@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <ReleaseVersion>2018.7.1</ReleaseVersion>
+    <AssemblyVersion>2018.7.1</AssemblyVersion>
+    <AssemblyFileVersion>2018.7.1</AssemblyFileVersion>
+    <Authors>scottxu</Authors>
+    <NeutralLanguage>zh-CN</NeutralLanguage>
+    <Owners>scottxu</Owners>
+    <Title>Simple Blog</Title>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <NoStdLib>true</NoStdLib>
+    <LangVersion>Latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <NoStdLib>true</NoStdLib>
+    <LangVersion>Latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.1" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.Design" Version="1.1.5" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.1.5" />
+    <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.8.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+    <Folder Include="Views\Admin\" />
+    <Folder Include="Views\Auth\" />
+    <Folder Include="Models\Entity\" />
+    <Folder Include="Models\Helper\" />
+    <Folder Include="Models\Util\" />
+    <Folder Include="Views\Setup\" />
+    <Folder Include="Models\ViewModel\" />
+    <Folder Include="Models\ViewModel\Home\" />
+    <Folder Include="Models\ViewModel\Admin\" />
+    <Folder Include="wwwroot\sys\" />
+    <Folder Include="TemplateParsingMiddleware\" />
+    <Folder Include="upload\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="wwwroot\sys\assets\admin\js\articlemanager.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="wwwroot\sys\assets\admin\js\articlemanager.js" />
+  </ItemGroup>
+</Project>

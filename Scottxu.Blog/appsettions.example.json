@@ -1,0 +1,15 @@
+{
+    "Logging": {
+      "IncludeScopes": false,
+      "LogLevel": {
+        "Default": "Warning"
+      }
+    },
+  
+    "DataBaseType": "MySQL", //数据库类型（可选值：MySQL、SQLite、SQLServer）
+    "ConnectionStrings": {
+      "MySQLConnection": "Server=localhost;Database=Blog;User=root;Password=123456;", //MySQL连接字符串
+      "SQLiteConnection": "", //SQLLite连接字符串
+      "SQLServerConnection": "" //SQLServer连接字符串
+    }
+  }

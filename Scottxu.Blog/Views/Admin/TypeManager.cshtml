@@ -1,0 +1,149 @@
+﻿@{
+    Layout = "_AdminLayout";
+    ViewBag.PageName = "type";
+}
+@model Scottxu.Blog.Models.ViewModel.Admin.TypeManagerViewModel
+@section Head {
+    <script src="~/sys/assets/admin/js/typemanager.js"></script>
+}
+<div class="tpl-portlet-components">
+    <div class="portlet-title">
+        <div class="caption font-green bold">
+            <span class="am-icon-file-o"></span> 类别列表
+        </div>
+    </div>
+    <div class="tpl-block">
+        <div class="am-g">
+            <div class="am-u-sm-12 am-u-md-6">
+                <div class="am-btn-toolbar">
+                    <div class="am-btn-group am-btn-group-xs">
+                        <button type="button" class="am-btn am-btn-default am-btn-success" data-am-modal="{target: '#add_item', closeViaDimmer: 0, width: 600, height: 370}"><span class="am-icon-plus"></span> 新增</button>
+                        <button type="button" class="am-btn am-btn-default am-btn-danger" id="delete_select"><span class="am-icon-trash-o"></span> 删除</button>
+                    </div>
+                </div>
+            </div>
+            <div class="am-u-sm-12 am-u-md-3">
+                <form>
+                    <div class="am-input-group am-input-group-sm">
+                        <input type="text" name="searchMessage" class="am-form-field" placeholder="搜索..." value="@(Model.SearchMessage)">
+                        <span class="am-input-group-btn">
+                            <button type="submit" class="am-btn am-btn-default am-btn-success tpl-am-btn-success am-icon-search"></button>
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="am-g">
+        <div class="am-u-sm-12">
+            <form asp-controller="Admin" asp-action="TypeManager_Delete" method="post" id="table_form">
+                <table class="am-table am-table-striped am-table-hover table-main">
+                    <thead>
+                        <tr>
+                            <th class="table-check"></th>
+                            <th class="table-title">类别</th>
+                            <th class="table-author am-hide-sm-only">排序</th>
+                            <th class="table-set" style="width:145px">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var articleType in Model.ArticleTypes)
+                        {
+                            <tr data-guid="@articleType.Guid" data-parentarticletypeguid="@articleType.ParentArticleTypeGuid">
+                                <td><input type="checkbox" name="deleteGuid" value="@articleType.Guid"></td>
+                                <td><a href="#" target="_blank" class="table-articleType-name">@(articleType.Name)</a></td>
+                                <td class="am-hide-sm-only table-articleType-sequence">@(articleType.Sequence)</td>
+                                <td>
+                                    <div class="am-btn-toolbar">
+                                        <div class="am-btn-group am-btn-group-xs">
+                                            <button type="button" class="am-btn am-btn-default am-btn-xs am-text-secondary edit-item" data-am-modal="{target: '#edit_item', closeViaDimmer: 0, width: 600, height: 370}"><span class="am-icon-pencil-square-o"></span> 编辑</button>
+                                            <button type="button" class="am-btn am-btn-default am-btn-xs am-text-danger delete-item"><span class="am-icon-trash-o"></span> 删除</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </form>
+            <div class="am-cf">
+                <div class="am-fr">
+                    <pagination pageIndex="@Model.PageInfo.PageIndex" pageCount="@Model.PageInfo.PageCount" parameters="searchMessage=@System.Web.HttpUtility.UrlEncode(Model.SearchMessage)"></pagination>
+                </div>
+            </div>
+            <hr>
+        </div>
+    </div>
+</div>
+<div class="tpl-alert"></div>
+<div class="am-modal am-modal-no-btn" tabindex="-1" id="add_item">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">
+            新增
+            <a class="am-close am-close-spin" data-am-modal-close><span class="am-icon-times"></span></a>
+        </div>
+        <div class="am-modal-bd">
+            <form class="am-form" style="text-align:left;" id="add_item_form" asp-controller="Admin" asp-action="TypeManager_AddItem" method="post">
+                <div class="am-form-group">
+                    <label for="add_item_name">类别名</label>
+                    <input type="text" class="" id="add_item_name" name="name" placeholder="输入类别名" maxlength="50" required>
+                </div>
+                <div class="am-form-group">
+                    <label for="add_item_parentType">父类别</label>
+                    <select id="add_item_parentType" name="parentArticleTypeGuid" placeholder="选择父类别" data-am-selected="{searchBox: 1, btnWidth: '100%', placeholder: '选择父类别'}" required>
+                        <option value="0" selected>根节点</option>
+                        @foreach (var articleType in Model.SelectedArticleTypes)
+                        {
+                            <option value="@articleType.Guid">@(articleType.Name)</option>
+                        }
+                    </select>
+                </div>
+                <div class="am-form-group">
+                    <label for="add_item_sort">排序</label>
+                    <input type="number" class="" id="add_item_sort" name="sequence" placeholder="输入排序序号" min="0" max="4294967295" required>
+                </div>
+                <hr />
+                <div style="text-align:right;">
+                    <button type="submit" class="am-btn am-btn-success"><span class="am-icon-plus"></span> 新增</button>
+                    <button type="reset" class="am-btn" data-am-modal-close><span class="am-icon-times"></span> 取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="am-modal am-modal-no-btn" tabindex="-1" id="edit_item">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">
+            编辑
+            <a class="am-close am-close-spin" data-am-modal-close><span class="am-icon-times"></span></a>
+        </div>
+        <div class="am-modal-bd">
+            <form class="am-form" style="text-align: left;" id="edit_item_form" asp-controller="Admin" asp-action="TypeManager_EditItem" method="post">
+                <input type="hidden" name="guid" id="edit_item_guid">
+                <div class="am-form-group">
+                    <label for="edit_item_name">类别名</label>
+                    <input type="text" class="" id="edit_item_name" name="name" placeholder="输入类别名" maxlength="50" required>
+                </div>
+                <div class="am-form-group">
+                    <label for="edit_item_parentType">父类别</label>
+                    <select id="edit_item_parentType" name="parentArticleTypeGuid" placeholder="选择父类别" data-am-selected="{searchBox: 1, btnWidth: '100%'}" required>
+                        <option value="0">根节点</option>
+                        @foreach (var articleType in Model.SelectedArticleTypes)
+                        {
+                            <option value="@articleType.Guid">@(articleType.Name)</option>
+                        }
+                    </select>
+                </div>
+                <div class="am-form-group">
+                    <label for="edit_item_sequence">排序</label>
+                    <input type="number" class="" id="edit_item_sequence" name="sequence" placeholder="输入排序序号" min="0" max="4294967295" required>
+                </div>
+                <hr />
+                <div style="text-align:right;">
+                    <button type="submit" class="am-btn am-btn-success"><span class="am-icon-pencil-square-o"></span> 修改</button>
+                    <button type="reset" class="am-btn" data-am-modal-close><span class="am-icon-times"></span> 取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

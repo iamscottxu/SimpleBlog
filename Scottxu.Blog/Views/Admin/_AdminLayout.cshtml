@@ -1,0 +1,166 @@
+﻿@{
+    Layout = "_Layout";
+    ViewBag.Title = " - 后台管理";
+}
+@section Head {
+    <link rel="icon" type="image/png" href="~/sys/assets/admin/i/favicon.png">
+    <link rel="apple-touch-icon-precomposed" href="~/sys/assets/admin/i/app-icon72x72@2x.png">
+    <meta name="apple-mobile-web-app-title" content="Simple Blog" />
+    <link rel="stylesheet" href="~/sys/assets/admin/css/amazeui.min.css" />
+    <link rel="stylesheet" href="~/sys/assets/admin/css/amazeui.chosen.css" />
+    <link rel="stylesheet" href="~/sys/assets/admin/css/chosen.css" />
+    <link rel="stylesheet" href="~/sys/assets/admin/css/admin.css">
+    <link rel="stylesheet" href="~/sys/assets/admin/css/app.css">
+    <script src="~/sys/assets/admin/js/jquery.min.js"></script>
+    <script src="~/sys/assets/admin/js/amazeui.min.js"></script>
+    <script src="~/sys/assets/admin/js/amazeui.chosen.min.js"></script>
+    <script src="~/sys/assets/admin/js/echarts.min.js"></script>
+    <script src="~/sys/assets/admin/js/common.js"></script>
+    <script>
+        $(function() {
+            let li = $('#menu_@(ViewBag.PageName)');
+            li.find('.nav-link').addClass('active');
+            let title = li.find('span').text();
+            document.title = title + document.title;
+            $('.page-title').text(title);
+        });
+    </script>
+    @RenderSection("Head", required: false)
+}
+<header class="am-topbar am-topbar-inverse admin-header">
+    <div class="am-topbar-brand">
+        <a href="/" class="tpl-logo">
+            <img src="~/sys/assets/admin/img/logo.png" alt="">
+        </a>
+    </div>
+    <div class="am-icon-list tpl-header-nav-hover-ico am-fl am-margin-right">
+
+    </div>
+
+    <button class="am-topbar-btn am-topbar-toggle am-btn am-btn-sm am-btn-success am-show-sm-only" data-am-collapse="{target: '#topbar-collapse'}"><span class="am-sr-only">导航切换</span> <span class="am-icon-bars"></span></button>
+
+    <div class="am-collapse am-topbar-collapse" id="topbar-collapse">
+
+        <ul class="am-nav am-nav-pills am-topbar-nav am-topbar-right admin-header-list tpl-header-list">
+
+            <li class="am-hide-sm-only"><a href="javascript:;" id="admin-fullscreen" class="tpl-header-list-link"><span class="am-icon-arrows-alt"></span> <span class="admin-fullText">开启全屏</span></a></li>
+
+            <li class="am-dropdown" data-am-dropdown data-am-dropdown-toggle>
+                <a class="am-dropdown-toggle tpl-header-list-link" href="javascript:;">
+                    <span class="tpl-header-list-user-nick">@(ViewBag.userName)</span><span class="tpl-header-list-user-ico"> <img src="~/sys/assets/admin/img/user01.png"></span>
+                </a>
+                <ul class="am-dropdown-content">
+                    <li><a href="#"><span class="am-icon-bell-o"></span> 资料</a></li>
+                    <li><a href="#"><span class="am-icon-cog"></span> 设置</a></li>
+                    <li><a asp-controller="Auth" asp-action="Logout"><span class="am-icon-power-off"></span> 退出</a></li>
+                </ul>
+            </li>
+            <li><a asp-controller="Auth" asp-action="Logout" class="tpl-header-list-link"><span class="am-icon-sign-out tpl-header-list-ico-out-size"></span></a></li>
+        </ul>
+    </div>
+</header>
+<div class="tpl-page-container tpl-page-header-fixed">
+
+    <div class="tpl-left-nav tpl-left-nav-hover">
+        <div class="tpl-left-nav-title">
+            功能菜单
+        </div>
+        <div class="tpl-left-nav-list">
+            <ul class="tpl-left-nav-menu">
+                <li class="tpl-left-nav-item" id="menu_home">
+                    <a href="~/sys/Admin" class="nav-link">
+                        <i class="am-icon-home"></i>
+                        <span>概览</span>
+                    </a>
+                </li>
+                <li class="tpl-left-nav-item" id="menu_article">
+                    <a href="~/sys/Admin/ArticleManager" class="nav-link tpl-left-nav-link-list">
+                        <i class="am-icon-clone"></i>
+                        <span>文章管理</span>
+                        <i class="tpl-left-nav-content tpl-badge-danger">
+                            @(ViewBag.articlesCount)
+                        </i>
+                    </a>
+                </li>
+                <li class="tpl-left-nav-item" id="menu_type">
+                    <a href="~/sys/Admin/TypeManager" class="nav-link tpl-left-nav-link-list">
+                        <i class="am-icon-folder-o"></i>
+                        <span>类别管理</span>
+                        <i class="tpl-left-nav-content tpl-badge-danger">
+                            @(ViewBag.articleTypesCount)
+                        </i>
+                    </a>
+                </li>
+                <li class="tpl-left-nav-item" id="menu_label">
+                    <a href="~/sys/Admin/LabelManager" class="nav-link tpl-left-nav-link-list">
+                        <i class="am-icon-hashtag"></i>
+                        <span>标签管理</span>
+                        <i class="tpl-left-nav-content tpl-badge-danger">
+                            @(ViewBag.articleLabelsCount)
+                        </i>
+                    </a>
+                </li>
+                <li class="tpl-left-nav-item" id="menu_template">
+                    <a href="~/sys/Admin/TemplateManager" class="nav-link">
+                        <i class="am-icon-file-o"></i>
+                        <span>模板管理</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="tpl-content-wrapper">
+        <div class="tpl-content-page-title page-title">
+        </div>
+        <ol class="am-breadcrumb">
+            <li><a href="/" class="am-icon-home">首页</a></li>
+            <li><a href="/sys/Admin">博客管理</a></li>
+            <li class="am-active page-title"></li>
+        </ol>
+        @RenderBody()
+    </div>
+</div>
+<div class="am-modal am-modal-alert" tabindex="-1" id="error-alert">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">错误</div>
+        <div class="am-modal-bd">
+        </div>
+        <div class="am-modal-footer">
+            <span class="am-modal-btn">确定</span>
+        </div>
+    </div>
+</div>
+<div class="am-modal am-modal-confirm" tabindex="-1" id="delete_item_confirm">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">删除记录</div>
+        <div class="am-modal-bd">
+            确定要删除这条记录吗？
+        </div>
+        <div class="am-modal-footer">
+            <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+            <span class="am-modal-btn" data-am-modal-confirm>确定</span>
+        </div>
+    </div>
+</div>
+<div class="am-modal am-modal-confirm" tabindex="-1" id="delete_select_confirm">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">删除记录</div>
+        <div class="am-modal-bd">
+            确定要删除选择的记录吗？
+        </div>
+        <div class="am-modal-footer">
+            <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+            <span class="am-modal-btn" data-am-modal-confirm>确定</span>
+        </div>
+    </div>
+</div>
+<div class="am-modal am-modal-loading am-modal-no-btn" tabindex="-1" id="modal-loading">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">正在工作……</div>
+        <div class="am-modal-bd">
+            <span class="am-icon-spinner am-icon-spin"></span>
+        </div>
+    </div>
+</div>
+<script src="~/sys/assets/admin/js/iscroll.js"></script>
+<script src="~/sys/assets/admin/js/app.js"></script>

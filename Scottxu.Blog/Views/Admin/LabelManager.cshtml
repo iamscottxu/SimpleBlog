@@ -1,0 +1,119 @@
+﻿@{
+    Layout = "_AdminLayout";
+    ViewBag.PageName = "label";
+}
+@model Scottxu.Blog.Models.ViewModel.Admin.LabelManagerViewModel
+@section Head {
+    <script src="~/sys/assets/admin/js/labelmanager.js"></script>
+}
+<div class="tpl-portlet-components">
+    <div class="portlet-title">
+        <div class="caption font-green bold">
+            <span class="am-icon-file-o"></span> 标签列表
+        </div>
+    </div>
+    <div class="tpl-block">
+        <div class="am-g">
+            <div class="am-u-sm-12 am-u-md-6">
+                <div class="am-btn-toolbar">
+                    <div class="am-btn-group am-btn-group-xs">
+                        <button type="button" class="am-btn am-btn-default am-btn-success" data-am-modal="{target: '#add_item', closeViaDimmer: 0, width: 600, height: 200}"><span class="am-icon-plus"></span> 新增</button>
+                        <button type="button" class="am-btn am-btn-default am-btn-danger" id="delete_select"><span class="am-icon-trash-o"></span> 删除</button>
+                    </div>
+                </div>
+            </div>
+            <div class="am-u-sm-12 am-u-md-3">
+                <form>
+                    <div class="am-input-group am-input-group-sm">
+                        <input type="text" name="searchMessage" class="am-form-field" placeholder="搜索..." value="@(Model.SearchMessage)">
+                        <span class="am-input-group-btn">
+                            <button type="submit" class="am-btn am-btn-default am-btn-success tpl-am-btn-success am-icon-search"></button>
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="am-g">
+        <div class="am-u-sm-12">
+            <form asp-controller="Admin" asp-action="LabelManager_Delete" method="post" id="table_form">
+                <table class="am-table am-table-striped am-table-hover table-main">
+                    <thead>
+                        <tr>
+                            <th class="table-check"></th>
+                            <th class="table-title">标签</th>
+                            <th class="table-set" style="width:145px">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var articleLabel in Model.ArticleLabels)
+                        {
+                        <tr data-guid="@articleLabel.Guid">
+                            <td><input type="checkbox" name="deleteGuid" value="@articleLabel.Guid"></td>
+                            <td><a href="#" target="_blank" class="table-articleLabel-name">@(articleLabel.Name)</a></td>
+                            <td>
+                                <div class="am-btn-toolbar">
+                                    <div class="am-btn-group am-btn-group-xs">
+                                        <button type="button" class="am-btn am-btn-default am-btn-xs am-text-secondary edit-item" data-am-modal="{target: '#edit_item', closeViaDimmer: 0, width: 600, height: 200}"><span class="am-icon-pencil-square-o"></span> 编辑</button>
+                                        <button type="button" class="am-btn am-btn-default am-btn-xs am-text-danger delete-item"><span class="am-icon-trash-o"></span> 删除</button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </form>
+            <div class="am-cf">
+                <div class="am-fr">
+                    <pagination pageIndex="@Model.PageInfo.PageIndex" pageCount="@Model.PageInfo.PageCount" parameters="searchMessage=@System.Web.HttpUtility.UrlEncode(Model.SearchMessage)"></pagination>
+                </div>
+            </div>
+            <hr>
+        </div>
+    </div>
+</div>
+<div class="tpl-alert"></div>
+<div class="am-modal am-modal-no-btn" tabindex="-1" id="add_item">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">
+            新增
+            <a class="am-close am-close-spin" data-am-modal-close><span class="am-icon-times"></span></a>
+        </div>
+        <div class="am-modal-bd">
+            <form class="am-form" style="text-align:left;" id="add_item_form" asp-controller="Admin" asp-action="LabelManager_AddItem" method="post">
+                <div class="am-form-group">
+                    <label for="add_item_name">标签名</label>
+                    <input type="text" class="" id="add_item_name" name="name" placeholder="输入标签名" maxlength="50" required>
+                </div>
+                <hr />
+                <div style="text-align:right;">
+                    <button type="submit" class="am-btn am-btn-success"><span class="am-icon-plus"></span> 新增</button>
+                    <button type="reset" class="am-btn" data-am-modal-close><span class="am-icon-times"></span> 取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="am-modal am-modal-no-btn" tabindex="-1" id="edit_item">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">
+            编辑
+            <a class="am-close am-close-spin" data-am-modal-close><span class="am-icon-times"></span></a>
+        </div>
+        <div class="am-modal-bd">
+            <form class="am-form" style="text-align: left;" id="edit_item_form" asp-controller="Admin" asp-action="LabelManager_EditItem" method="post">
+                <input type="hidden" name="guid" id="edit_item_guid">
+                <div class="am-form-group">
+                    <label for="edit_item_name">标签名</label>
+                    <input type="text" class="" id="edit_item_name" name="name" placeholder="输入标签名" maxlength="50" required>
+                </div>
+                <hr />
+                <div style="text-align:right;">
+                    <button type="submit" class="am-btn am-btn-success"><span class="am-icon-pencil-square-o"></span> 修改</button>
+                    <button type="reset" class="am-btn" data-am-modal-close><span class="am-icon-times"></span> 取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>    

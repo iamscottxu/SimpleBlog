@@ -1,0 +1,52 @@
+﻿@{
+    ViewBag.Title = "系统配置 - Simple Blog";
+}
+@section Head {
+    <link rel="icon" type="image/png" href="~/sys/assets/admin/i/favicon.png">
+    <link rel="apple-touch-icon-precomposed" href="~/sys/assets/admin/i/app-icon72x72@2x.png">
+    <meta name="apple-mobile-web-app-title" content="Simple Blog" />
+    <link rel="stylesheet" href="~/sys/assets/admin/css/amazeui.min.css" />
+    <link rel="stylesheet" href="~/sys/assets/admin/css/admin.css">
+    <link rel="stylesheet" href="~/sys/assets/admin/css/app.css">
+    <script src="~/sys/assets/admin/js/jquery.min.js"></script>
+    <script src="~/sys/assets/admin/js/amazeui.min.js"></script>
+    <script src="~/sys/assets/common/js/md5.js"></script>
+    <script src="~/sys/assets/setup/js/index.js"></script>
+}
+<div class="am-g myapp-login">
+    <div class="myapp-login-logo-block  tpl-login-max">
+        <div class="myapp-login-logo-text">
+            <div class="myapp-login-logo-text">
+                Simple Blog<span> Setup</span> <i class="am-icon-skyatlas"></i>
+            </div>
+        </div>
+        <div class="login-font">
+            <!--<i>Log In </i> or <span> Sign Up</span>-->
+            <i>欢迎使用 Simple Blog，请你完成以下配置并继续。</i>
+            <span id="message"></span>
+        </div>
+        <div class="am-u-sm-10 login-am-center">
+            <form class="am-form" data-am-validator>
+                <fieldset>
+                    <div class="am-form-group login-am-center-first">
+                        <input type="text" minlength="1" maxlength="20" required class="" placeholder="昵称" id="userName">
+                    </div>
+                    <div class="am-form-group">
+                        <input type="text" minlength="1" maxlength="20" required class="" placeholder="博客名称" id="blogName">
+                    </div>
+                    <div class="am-form-group">
+                        <input type="email" required class="" placeholder="电子邮件" id="email">
+                    </div>
+                    <div class="am-form-group">
+                        <input type="password" minlength="8" maxlength="20" required class="" placeholder="密码" id="password">
+                    </div>
+                    <div class="am-form-group login-am-center-last">
+                        <input type="password" minlength="8" maxlength="20" required class="" placeholder="重复密码" id="rePassword" data-equal-to="#password">
+                    </div>
+                    <p><button type="submit" class="am-btn am-btn-default" data-am-loading="{spinner: 'circle-o-notch', loadingText: '正在配置……'}" id="btn_Login">继续</button></p>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="~/sys/assets/admin/js/app.js"></script>

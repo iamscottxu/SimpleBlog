@@ -1,0 +1,217 @@
+﻿@{
+    Layout = "_AdminLayout";
+    ViewBag.PageName = "article";
+}
+@model Scottxu.Blog.Models.ViewModel.Admin.ArticleManagerViewModel
+@section Head {
+    <style>
+        .edui-editor.edui-default {
+            z-index: 999 !important;
+        }
+
+        .edui-editor-iframeholder.edui-default {
+            z-index: 999 !important;
+        }
+    </style>
+    <script src="~/sys/ueditor/ueditor.config.js"></script>
+    <script src="~/sys/ueditor/ueditor.all.min.js"></script>
+    <script src="~/sys/assets/admin/js/articlemanager.js"></script>
+}
+<div class="tpl-portlet-components">
+    <div class="portlet-title">
+        <div class="caption font-green bold">
+            <span class="am-icon-code"></span> 文章列表
+        </div>
+    </div>
+    <div class="tpl-block">
+        <div class="am-g">
+            <div class="am-u-sm-12 am-u-md-6">
+                <div class="am-btn-toolbar">
+                    <div class="am-btn-group am-btn-group-xs">
+                        <button type="button" class="am-btn am-btn-default am-btn-success" data-am-modal="{target: '#add_item'}"><span class="am-icon-plus"></span> 新增</button>
+                        <button type="button" class="am-btn am-btn-default am-btn-danger" id="delete_select"><span class="am-icon-trash-o"></span> 删除</button>
+                    </div>
+                </div>
+            </div>
+            <form>
+                <div class="am-u-sm-12 am-u-md-3">
+                    <div class="am-form-group">
+                        <select data-am-selected="{btnSize: 'sm', maxHeight: 130}" id="articleType_select" name="articleTypeGuid">
+                            @{ 
+                                if (Model.ArticleType == null) { 
+                                    <option value="0" selected="selected">所有类别</option>
+                                }
+                                else
+                                {
+                                    <option value="0">所有类别</option>
+
+                                }
+                            }
+                            @foreach (var articleType in Model.SelectedArticleTypes)
+                            {
+                                if (Model.ArticleType == articleType) { 
+                                    <option value="@articleType.Guid" selected="selected">@(articleType.Name)</option>
+                                }
+                                else
+                                {
+                                    <option value="@articleType.Guid">@(articleType.Name)</option>
+                                }
+
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="am-u-sm-12 am-u-md-3">
+                    <div class="am-input-group am-input-group-sm">
+                        <input type="text" name="searchMessage" class="am-form-field" placeholder="搜索..." value="@(Model.SearchMessage)">
+                        <span class="am-input-group-btn">
+                            <button type="submit" class="am-btn am-btn-default am-btn-success tpl-am-btn-success am-icon-search"></button>
+                        </span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <form asp-controller="Admin" asp-action="ArticleManager_Delete" method="post" id="table_form">
+            <ul class="tpl-task-list">
+                @foreach (var article in Model.Articles)
+                {
+                    <li class="table-item" data-guid="@article.Guid">
+                        <div class="task-checkbox">
+                            <input type="checkbox" class="liChild" name="deleteGuid" value="@article.Guid">
+                        </div>
+                        <div class="task-title">
+                            @if (article.ArticleLabelArticles != null)
+                            {
+                                foreach (var label in article.ArticleLabelArticles)
+                                {
+                                    <span class="label label-sm label-success">@(label.ArticleLabel.Name)</span>
+                                }
+                            }
+                            <span class="task-title-sp">@(article.Name)</span>
+                        </div>
+                        <div class="task-config">
+                            <div class="am-dropdown tpl-task-list-dropdown" data-am-dropdown>
+                                <a href="###" class="am-dropdown-toggle tpl-task-list-hover " data-am-dropdown-toggle>
+                                    <i class="am-icon-cog"></i> <span class="am-icon-caret-down"></span>
+                                </a>
+                                <ul class="am-dropdown-content tpl-task-list-dropdown-ul">
+                                    <li>
+                                        <a class="edit-item">
+                                            <i class="am-icon-pencil"></i> 编辑
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="delete-item">
+                                            <i class="am-icon-trash-o"></i> 删除
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </form>
+    </div>
+    <br>
+    <div class="am-cf">
+        <div class="am-fr">
+            <pagination pageIndex="@Model.PageInfo.PageIndex" pageCount="@Model.PageInfo.PageCount" parameters="articleTypeGuid=@Model.ArticleType?.Guid&searchMessage=@System.Web.HttpUtility.UrlEncode(Model.SearchMessage)"></pagination>
+        </div>
+    </div>
+    <hr>
+</div>
+<div class="am-popup" id="add_item" style="height:100%;width:100%;left:0;top:0;margin:0;">
+    <div class="am-popup-inner">
+        <div class="am-popup-hd">
+            <h4 class="am-popup-title">新增</h4>
+            <span data-am-modal-close
+                  class="am-close"><span class="am-icon-times"></span></span>
+        </div>
+        <div class="am-popup-bd" style="height:100%;width:100%;">
+            <form class="am-form" style="text-align:left;" id="add_item_form" asp-controller="Admin" asp-action="ArticleManager_AddItem" method="post">
+                <div class="am-form-group">
+                    <label for="add_item_name">标题</label>
+                    <input type="text" id="add_item_name" name="name" placeholder="输入标题" required/>
+                </div>
+                <div class="am-form-group">
+                    <label for="add_item_type">类别</label>
+                    <select id="add_item_type" name="articleTypeGuid" placeholder="选择类别" data-am-selected="{searchBox: 1, btnWidth: '100%'}" required>
+                        <option value=""></option>
+                        @foreach (var articleType in Model.SelectedArticleTypes)
+                        {
+                        <option value="@articleType.Guid">@(articleType.Name)</option>
+                        }
+                    </select>
+                </div>
+                <div class="am-form-group">
+                    <label for="add_item_label">标签</label>
+                    <select id="add_item_label" name="articleLabelGuids" data-placeholder="选择标签" multiple class="chosen-select" required>
+                        <option value=""></option>
+                        @foreach (var articleLabel in Model.SelectedArticleLabels)
+                        {
+                        <option value="@articleLabel.Guid">@(articleLabel.Name)</option>
+                        }
+                    </select>
+                </div>
+                <div class="am-form-group">
+                    <label for="add_item_container">正文</label>
+                    <script id="add_item_container" name="content" type="text/plain"></script>
+                </div>
+                <hr />
+                <div style="text-align: right;">
+                    <button type="submit" class="am-btn am-btn-success"><span class="am-icon-plus"></span> 新增</button>
+                    <button type="reset" class="am-btn" data-am-modal-close><span class="am-icon-times"></span> 取消</button>
+                </div>
+            </form>
+            <br />
+        </div>
+    </div>
+</div>
+<div class="am-popup" id="edit_item" style="height:100%;width:100%;left:0;top:0;margin:0;">
+    <div class="am-popup-inner">
+        <div class="am-popup-hd">
+            <h4 class="am-popup-title">编辑</h4>
+            <span data-am-modal-close
+                  class="am-close"><span class="am-icon-times"></span></span>
+        </div>
+        <div class="am-popup-bd" style="height:100%;width:100%;">
+            <form class="am-form" style="text-align:left;" id="edit_item_form" asp-controller="Admin" asp-action="ArticleManager_EditItem" method="post">
+                <input type="hidden" name="guid" id="edit_item_guid">
+                <div class="am-form-group">
+                    <label for="edit_item_name">标题</label>
+                    <input type="text" id="edit_item_name" name="name" placeholder="输入标题" required/>
+                </div>
+                <div class="am-form-group">
+                    <label for="edit_item_type">类别</label>
+                    <select id="edit_item_type" name="articleTypeGuid" placeholder="选择类别" data-am-selected="{searchBox: 1, btnWidth: '100%'}" required>
+                        @foreach (var articleType in Model.SelectedArticleTypes)
+                        {
+                        <option value="@articleType.Guid">@(articleType.Name)</option>
+                        }
+                    </select>
+                </div>
+                <div class="am-form-group">
+                    <label for="edit_item_label">标签</label>
+                    <select id="edit_item_label" name="articleLabelGuids" data-placeholder="选择标签" multiple class="chosen-select" required>
+                        <option value=""></option>
+                        @foreach (var articleLabel in Model.SelectedArticleLabels)
+                        {
+                        <option value="@articleLabel.Guid">@(articleLabel.Name)</option>
+                        }
+                    </select>
+                </div>
+                <div class="am-form-group">
+                    <label for="edit_item_container">正文</label>
+                    <script id="edit_item_container" name="content" type="text/plain"></script>
+                </div>
+                <hr />
+                <div style="text-align: right;">
+                    <button type="submit" class="am-btn am-btn-success"><span class="am-icon-pencil-square-o"></span> 修改</button>
+                    <button type="reset" class="am-btn" data-am-modal-close><span class="am-icon-times"></span> 取消</button>
+                </div>
+            </form>
+            <br />
+        </div>
+    </div>
+</div>

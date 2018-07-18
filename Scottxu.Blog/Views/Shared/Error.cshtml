@@ -1,0 +1,44 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model Scottxu.Blog.Models.ViewModel.Home.ErrorViewModel
+@{
+    <link rel="stylesheet" href="~/sys/assets/admin/css/amazeui.min.css" />
+    <style>
+        .page-error {
+            background: #fff;
+            border: none;
+            width: 200px;
+            margin: 0 auto;
+        }
+    </style>
+    <script src="~/sys/assets/admin/js/jquery.min.js"></script>
+    <script src="~/sys/assets/admin/js/amazeui.min.js"></script>
+}
+<div class="am-g">
+    <div class="am-u-sm-12">
+        @if (Model.ErrorCode == null)
+        {
+            <h2 class="am-text-center am-text-xxxl am-margin-top-lg">@(Model.RequestId)</h2>
+        }
+        else
+        {
+            <h2 class="am-text-center am-text-xxxl am-margin-top-lg">@(Model.ErrorCode). @(Model.EnglishDescribe)</h2>
+            <p class="am-text-center">@(Model.ChineseDescribe)</p>
+        }
+        <pre class="page-error">          .----.
+       _.'__    `.
+   .--($)($$)---/#\
+ .' @@          /###\
+ :         ,   #####
+  `-..__.-' _.-\###/
+        `;_:    `"'
+      .'"""""`.
+     /,      \\
+    //        \\
+    `-._______.-'
+    ___`. | .'___
+   (______|______)
+        </pre>
+    </div>
+</div>
