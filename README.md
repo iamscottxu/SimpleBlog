@@ -1,7 +1,10 @@
-# SimpleBlog（Bate）
+# SimpleBlog（Beta）
+![Beta](https://img.shields.io/badge/version-beta-red.svg)
+[![MIT](https://img.shields.io/packagist/l/doctrine/orm.svg)](https://mit-license.org/)
+
 Simple Blog 是一个使用 Asp.Net Core 开发的轻型跨平台博客系统。支持完整的自定义模板功能。可以自由上传任何静态Html页面作为模板，静态页面通过调用后台API获取数据。
 
-==这是一个实验性的程序，请不要用于生产环境。==
+**这是一个实验性的程序，请不要用于生产环境。**
 
 ## 已知问题
 *暂不支持RSS订阅，图片和附件上传以及博客编辑器；
