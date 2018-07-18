@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Scottxu.Blog.Models;
 using Scottxu.Blog.Models.Helper;
@@ -9,7 +10,8 @@ namespace Scottxu.Blog.Controllers
 {
     public class SetupController : BaseController
     {
-        public SetupController(BlogSystemContext context) : base(context) { }
+        IHostingEnvironment HostingEnvironment { get; }
+        public SetupController(BlogSystemContext context, IHostingEnvironment hostingEnvironment) : base(context) => HostingEnvironment = hostingEnvironment;
 
         // GET: /Setup
         public IActionResult Index()
@@ -41,7 +43,7 @@ namespace Scottxu.Blog.Controllers
                 userName, FormatVerificationHelper.FormatType.UserName, new ParametersFormatErrorException("昵称格式错误。"));
             DataBaseContext.Database.EnsureDeleted();
             DataBaseContext.Database.EnsureCreated();
-            BlogSystemDatabaseInitializer.Seed(DataBaseContext, new BlogSystemDatabaseInitializer.Configs() {
+            BlogSystemDatabaseInitializer.Seed(HttpContext, DataBaseContext, HostingEnvironment, new BlogSystemDatabaseInitializer.Configs() {
                 Email = email,
                 Password = password,
                 BlogName = blogName,

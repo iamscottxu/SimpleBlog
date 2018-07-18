@@ -92,6 +92,7 @@ namespace Scottxu.Blog.Models.Helper
             return formFileInfos;
         }
 
+
         /// <summary>
         /// 保存Zip文件并写入记录到数据库。
         /// </summary>
@@ -102,8 +103,19 @@ namespace Scottxu.Blog.Models.Helper
             var request = httpContext.Request;
             var session = httpContext.Session;
             var formFile = request.Form.Files[0];
+            return SaveZipFiles(httpContext, formFile.OpenReadStream());
+        }
+
+        /// <summary>
+        /// 保存Zip文件并写入记录到数据库。
+        /// </summary>
+        /// <returns>上传文件信息的集合</returns>
+        /// <param name="httpContext">Http上下文</param>
+        public List<FormFileInfo> SaveZipFiles(HttpContext httpContext, Stream fileStream)
+        {
+            var session = httpContext.Session;
             List<FormFileInfo> formFileInfos = new List<FormFileInfo>();
-            using (var zipInputStream = new ZipInputStream(formFile.OpenReadStream()))
+            using (var zipInputStream = new ZipInputStream(fileStream))
             {
                 ZipEntry zipEntry;
                 while((zipEntry = zipInputStream.GetNextEntry()) != null) {

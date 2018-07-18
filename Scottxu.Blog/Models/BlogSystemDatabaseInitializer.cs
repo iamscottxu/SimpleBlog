@@ -1,4 +1,8 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Scottxu.Blog.Models.Entitys;
 using Scottxu.Blog.Models.Helper;
 
@@ -6,19 +10,26 @@ namespace Scottxu.Blog.Models
 {
     public static class BlogSystemDatabaseInitializer
     {
-        public struct Configs {
+        public struct Configs
+        {
             public String Email { get; set; }
             public String Password { get; set; }
             public String BlogName { get; set; }
             public string UserName { get; set; }
         }
 
-        internal static void Seed(BlogSystemContext dataBaseContext, Configs configs)
+        internal static void Seed(HttpContext httpContext, BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment, Configs configs)
         {
-            Config(dataBaseContext, configs);
+            using (var transaction = dataBaseContext.Database.BeginTransaction())
+            {
+                Config(dataBaseContext, configs);
+                TemplateFile(httpContext, dataBaseContext, hostingEnvironment);
+                transaction.Commit();
+            }
         }
 
-        static void Config(BlogSystemContext dataBaseContext, Configs configs) {
+        static void Config(BlogSystemContext dataBaseContext, Configs configs)
+        {
             ConfigHelper configHelper = new ConfigHelper(dataBaseContext)
             {
                 Email = configs.Email,
@@ -29,5 +40,18 @@ namespace Scottxu.Blog.Models
             configHelper.SaveAll();
         }
 
+        static void TemplateFile(HttpContext httpContext, BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment)
+        {
+            var uploadHelper = new UploadHelper(dataBaseContext, hostingEnvironment);
+            var formFileInfos = uploadHelper.SaveZipFiles(httpContext, File.OpenRead($"{hostingEnvironment.ContentRootPath}/default-template.zip"));
+            dataBaseContext.TemplateFiles.AddRange(formFileInfos.Select(formFile => new TemplateFile()
+            {
+                MIME = formFile.MIME,
+                Name = formFile.FileName,
+                UploadedFile = formFile.UploadedFile,
+                VirtualPath = formFile.VirtualPath
+            }));
+            dataBaseContext.SaveChanges();
+        }
     }
 }
