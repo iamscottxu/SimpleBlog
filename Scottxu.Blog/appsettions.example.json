@@ -1,3 +1,5 @@
+//注意：Json不支持注释功能。
+//将此配置文件中的注释删除并修改配置后，重命名为“appsettings.json”后，系统才能正常运行。
 {
     "Logging": {
       "IncludeScopes": false,
