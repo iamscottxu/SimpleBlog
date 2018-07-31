@@ -54,9 +54,9 @@
     <Folder Include="Models\Exception\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Remove="wwwroot\sys\assets\admin\js\articlemanager.js" />
+    <None Remove="default-template.zip" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="wwwroot\sys\assets\admin\js\articlemanager.js" />
+    <Content Include="default-template.zip" />
   </ItemGroup>
 </Project>
