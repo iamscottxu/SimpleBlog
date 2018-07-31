@@ -118,8 +118,10 @@ namespace Scottxu.Blog.Models.Helper
             using (var zipInputStream = new ZipInputStream(fileStream))
             {
                 ZipEntry zipEntry;
-                while((zipEntry = zipInputStream.GetNextEntry()) != null) {
-                    if (zipEntry.IsFile) {
+                while ((zipEntry = zipInputStream.GetNextEntry()) != null)
+                {
+                    if (zipEntry.IsFile)
+                    {
                         var memoryStream = new MemoryStream();
                         byte[] buffer = new byte[4096];
                         StreamUtils.Copy(zipInputStream, memoryStream, buffer);
@@ -163,7 +165,19 @@ namespace Scottxu.Blog.Models.Helper
                                                        .Include(o => o.TemplateFiles)
                                                        .Include(o => o.UploadedFileArticles)
                                                        .FirstOrDefault(q => q.Guid == uploadedFileGuid);
-            if (uploadedFile.UploadedFileArticles.Count() == 0 && uploadedFile.TemplateFiles.Count() == 0){
+
+            var templateFiles = new List<TemplateFile>();
+            uploadedFile.TemplateFiles.ToList().ForEach(n =>
+            {
+                if (dataBaseContext.Entry(n).State != EntityState.Deleted) templateFiles.Add(n);
+            });
+            var UploadedFileArticles = new List<UploadedFileArticle>();
+            uploadedFile.UploadedFileArticles.ToList().ForEach(n =>
+            {
+                if (dataBaseContext.Entry(n).State != EntityState.Deleted) UploadedFileArticles.Add(n);
+            });
+            if (!UploadedFileArticles.Any() && !templateFiles.Any())
+            {
                 DeleteFileFromDisk(GetFileInfo(uploadedFile));
                 dataBaseContext.UploadedFiles.Remove(uploadedFile);
             }
@@ -174,7 +188,7 @@ namespace Scottxu.Blog.Models.Helper
         /// </summary>
         /// <returns>文件信息</returns>
         /// <param name="uploadedFile">上传文件实体</param>
-        public FileInfo GetFileInfo(UploadedFile uploadedFile) 
+        public FileInfo GetFileInfo(UploadedFile uploadedFile)
             => new FileInfo($"{hostingEnvironment.ContentRootPath}{UPLOAD_PATH}/{uploadedFile.FileName}");
 
         /// <summary>
@@ -195,7 +209,8 @@ namespace Scottxu.Blog.Models.Helper
         /// 从磁盘删除文件。
         /// </summary>
         /// <param name="fileInfo">文件信息</param>
-        static void DeleteFileFromDisk(FileInfo fileInfo) {
+        static void DeleteFileFromDisk(FileInfo fileInfo)
+        {
             if (fileInfo.Exists) fileInfo.Delete();
         }
 
@@ -224,11 +239,12 @@ namespace Scottxu.Blog.Models.Helper
         /// </summary>
         /// <returns>MIME类型</returns>
         /// <param name="fileName">File name.</param>
-        static string GetMappings(string fileName) {
+        static string GetMappings(string fileName)
+        {
             string extensionName = Path.GetExtension(fileName);
             var fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
             string value;
-            if(!fileExtensionContentTypeProvider.Mappings.TryGetValue(extensionName, out value))
+            if (!fileExtensionContentTypeProvider.Mappings.TryGetValue(extensionName, out value))
                 value = "application/octet-stream";
             return value;
         }

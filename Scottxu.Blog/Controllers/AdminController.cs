@@ -432,20 +432,15 @@ namespace Scottxu.Blog.Controllers
         public void TemplateManager_Delete(Guid[] deleteGuid) {
             if (deleteGuid == null || deleteGuid.Count() == 0) 
                 throw new MissingParametersException("缺少参数。");
-            using (var transaction = DataBaseContext.Database.BeginTransaction())
+            var uploadHelper = new UploadHelper(DataBaseContext, HostingEnvironment);
+            deleteGuid.ToList().ForEach(d =>
             {
-                var uploadHelper = new UploadHelper(DataBaseContext, HostingEnvironment);
-                deleteGuid.ToList().ForEach(d =>
-                {
-                    var templateFiles = DataBaseContext.TemplateFiles.FirstOrDefault(q => q.Guid == d);
-                    var uploadedFileGuid = templateFiles.UploadedFileGuid;
-                    DataBaseContext.TemplateFiles.Remove(templateFiles);
-                    DataBaseContext.SaveChanges();
-                    uploadHelper.CheckAndDeleteFile(uploadedFileGuid);
-                });
-                DataBaseContext.SaveChanges();
-                transaction.Commit();
-            }
+                var templateFiles = DataBaseContext.TemplateFiles.FirstOrDefault(q => q.Guid == d);
+                var uploadedFileGuid = templateFiles.UploadedFileGuid;
+                DataBaseContext.TemplateFiles.Remove(templateFiles);
+                uploadHelper.CheckAndDeleteFile(uploadedFileGuid);
+            });
+            DataBaseContext.SaveChanges();
         }
 
         class TemplateManager_AddItemVirtualPathIsExistException : Exception
@@ -506,10 +501,9 @@ namespace Scottxu.Blog.Controllers
                 //清除所有模板文件
                 DataBaseContext.TemplateFiles.Select(o => o.Guid).ToList().ForEach(d =>
                 {
-                    var templateFiles = DataBaseContext.TemplateFiles.FirstOrDefault(q => q.Guid == d);
-                    var uploadedFileGuid = templateFiles.UploadedFileGuid;
-                    DataBaseContext.TemplateFiles.Remove(templateFiles);
-                    DataBaseContext.SaveChanges();
+                    var templateFile = DataBaseContext.TemplateFiles.FirstOrDefault(q => q.Guid == d);
+                    var uploadedFileGuid = templateFile.UploadedFileGuid;
+                    DataBaseContext.TemplateFiles.Remove(templateFile);
                     uploadHelper.CheckAndDeleteFile(uploadedFileGuid);
                 });
                 DataBaseContext.SaveChanges();
