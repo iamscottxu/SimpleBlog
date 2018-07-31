@@ -1,10 +1,7 @@
-﻿using System;
-namespace Scottxu.Blog.Models.Exception
+﻿namespace Scottxu.Blog.Models.Exception
 {
-    public class MissingParametersException
+    class MissingParametersException : System.Exception
     {
-        public MissingParametersException()
-        {
-        }
+        public MissingParametersException(string message) : base(message) { }
     }
 }

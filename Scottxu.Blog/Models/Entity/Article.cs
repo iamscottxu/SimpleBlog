@@ -1,6 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Scottxu.Blog.Models.Exception;
+using Scottxu.Blog.Models.Helper;
+using Scottxu.Blog.Models.ViewModel;
 
 namespace Scottxu.Blog.Models.Entitys
 {
@@ -66,6 +72,106 @@ namespace Scottxu.Blog.Models.Entitys
         public Article() {
             ClickTraffic = 0;
             PublishDate = DateTime.UtcNow;
+        }
+
+        public static List<Article> GetData(BlogSystemContext dataBaseContext, PageInfoViewModel pageInfo, string searchMessage, Guid? articleTypeGuid = null, Guid? articleLabelGuid = null, bool getArticleType = true, bool getArticleLabels = true, bool getText = true)
+        {
+            var efHelper = new EFHelper(dataBaseContext);
+
+            IQueryable<Article> q;
+            if (articleLabelGuid.HasValue)
+                q = dataBaseContext.ArticleLabelArticles.Where(
+                    o => o.ArticleLabelGuid == articleLabelGuid).Select(o => o.Article);
+            else q = dataBaseContext.Articles;
+
+            IQueryable<ArticleLabelArticle> m = dataBaseContext.ArticleLabelArticles;
+
+            m = m.Include(o => o.Article)
+                .Include(o => o.ArticleLabel);
+
+            q = q.Include(o => o.ArticleType);
+
+            if (articleTypeGuid.HasValue)
+            {
+                var selectedArticleTypeGuids = ArticleType.GetVirtualTree(dataBaseContext, articleTypeGuid.Value);
+                q = q.Join(selectedArticleTypeGuids, l => l.ArticleType, r => r, (l, r) => l);
+            }
+
+            // 表单搜索
+            string searchText = searchMessage?.Trim();
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                q = q.Where(o => o.Name.Contains(searchText));
+            }
+
+            if (pageInfo != null)
+            {
+                // 在添加条件之后，排序和分页之前获取总记录数
+                pageInfo.RecordCount = q.Count();
+
+                // 排列和数据库分页
+                q = efHelper.SortAndPage(q, pageInfo);
+            }
+
+            var articles = q.ToList();
+
+            articles.ForEach(o => o.ArticleLabelArticles = m.Where(p => p.Article == o).ToList());
+
+            return articles;
+        }
+
+        public static void Delete(BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment, Guid[] deleteGuid)
+        {
+            var uploadHelper = new UploadHelper(dataBaseContext, hostingEnvironment);
+            deleteGuid.ToList().ForEach(d =>
+            {
+                var article = dataBaseContext.Articles.FirstOrDefault(q => q.Guid == d);
+                var uploadedFileArticles = dataBaseContext.UploadedFileArticles.Where(q => q.Article == article).ToList();
+                uploadedFileArticles.ForEach(q => {
+                    dataBaseContext.UploadedFileArticles.Remove(q);
+                    uploadHelper.CheckAndDeleteFile(q.UploadedFileGuid);
+                });
+                dataBaseContext.Articles.Remove(article);
+            });
+        }
+
+        public static void AddItem(BlogSystemContext dataBaseContext, string name, Guid articleTypeGuid, Guid[] articleLabelGuids, string content)
+        {
+            FormatVerificationHelper.FormatVerification(name, FormatVerificationHelper.FormatType.ArticleName, new ParametersFormatErrorException("文章名格式错误。"));
+            var article = new Article()
+            {
+                Name = name,
+                ArticleTypeGuid = articleTypeGuid,
+                Content = content
+            };
+            dataBaseContext.Articles.Add(article);
+            dataBaseContext.ArticleLabelArticles.AddRange(articleLabelGuids.Select(o => new ArticleLabelArticle
+            {
+                ArticleLabelGuid = o,
+                Article = article
+            }));
+        }
+
+        public static void EditItem(BlogSystemContext dataBaseContext, Guid guid, string name, Guid articleTypeGuid, Guid[] articleLabelGuids, string content)
+        {
+            FormatVerificationHelper.FormatVerification(name, FormatVerificationHelper.FormatType.ArticleName, new ParametersFormatErrorException("文章名格式错误。"));
+            var article = dataBaseContext.Articles.FirstOrDefault(q => q.Guid == guid);
+            article.Name = name;
+            article.ArticleTypeGuid = articleTypeGuid;
+            article.Content = content;
+            dataBaseContext.ArticleLabelArticles.RemoveRange(dataBaseContext.ArticleLabelArticles.Where(o => o.Article == article));
+            dataBaseContext.ArticleLabelArticles.AddRange(articleLabelGuids.Select(o => new ArticleLabelArticle
+            {
+                ArticleLabelGuid = o,
+                Article = article
+            }));
+        }
+
+        public static Article GetArticle(BlogSystemContext dataBaseContext, Guid guid, bool addUpClickTraffic = false)
+        {
+            var article = dataBaseContext.Articles.Include(o => o.ArticleType).FirstOrDefault(o => o.Guid == guid);
+            if (addUpClickTraffic) article.ClickTraffic++;
+            return article;
         }
     }
 }

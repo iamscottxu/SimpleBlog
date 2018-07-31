@@ -51,6 +51,7 @@
     <Folder Include="wwwroot\sys\" />
     <Folder Include="TemplateParsingMiddleware\" />
     <Folder Include="upload\" />
+    <Folder Include="Models\Exception\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\sys\assets\admin\js\articlemanager.js" />

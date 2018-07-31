@@ -27,9 +27,8 @@ namespace Scottxu.Blog.Controllers
         [ApiAction]
         public object GetArticle(Guid articleGuid)
         {
-            var article = DataBaseContext.Articles.Include(o => o.ArticleType).FirstOrDefault(o => o.Guid == articleGuid);
-            var articleLabel = DataBaseContext.ArticleLabelArticles.Include(o => o.ArticleLabel).Where(o => o.Article == article).Select(o => o.ArticleLabel).ToList();
-            article.ClickTraffic++;
+            var article = Article.GetArticle(DataBaseContext, articleGuid, true);
+            var articleLabel = ArticleLabel.GetAllDataByArticle(DataBaseContext, article);
             DataBaseContext.SaveChanges();
             return new {
                 article.Name,
@@ -65,69 +64,31 @@ namespace Scottxu.Blog.Controllers
                     SortField = sortField,
                     PageIndex = pageIndex
                 };
+
+            var articles = Article.GetData(DataBaseContext, pageInfo, searchMessage, articleTypeGuid, articleLabelGuid, getArticleType, getArticleLabels, getText);
+
             return new APIModel()
             {
                 PageInfo = pageInfo,
                 SearchMessage = searchMessage,
-                List = GetArticleList_GetData(pageInfo, searchMessage, articleTypeGuid, articleLabelGuid, getArticleType, getArticleLabels, getText)
+                List = 
+                    articles.Select(o => new {
+                        o.Guid,
+                        o.Name,
+                        o.PublishDate,
+                        o.ClickTraffic,
+                        ArticleType = getArticleType ? new
+                        {
+                            o.ArticleType.Guid,
+                            o.ArticleType.Name
+                        } : null,
+                        ArticleLabels = getArticleLabels ? o.ArticleLabelArticles.Select(p => new {
+                            p.ArticleLabel.Guid,
+                            p.ArticleLabel.Name
+                        }) : null,
+                        text = getText ? GetArticleList_GetHtmlText(o.Content) : null
+                })
             };
-        }
-
-        object GetArticleList_GetData(PageInfoViewModel pageInfo, string searchMessage, Guid? articleTypeGuid, Guid? articleLabelGuid, bool getArticleType, bool getArticleLabels, bool getText)
-        {
-            IQueryable<Article> q;
-            if (articleLabelGuid.HasValue)
-                q = DataBaseContext.ArticleLabelArticles.Where(
-                    o => o.ArticleLabelGuid == articleLabelGuid).Select(o => o.Article);
-            else q = DataBaseContext.Articles;
-
-            IQueryable<ArticleLabelArticle> m = DataBaseContext.ArticleLabelArticles;
-
-            m = m.Include(o => o.Article)
-                .Include(o => o.ArticleLabel);
-
-            q = q.Include(o => o.ArticleType);
-                
-            if (articleTypeGuid.HasValue) {
-                var selectedArticleTypeGuids = ArticleType.GetVirtualTree(DataBaseContext, articleTypeGuid.Value);
-                q = q.Join(selectedArticleTypeGuids, l => l.ArticleType, r => r, (l, r) => l);
-            }
-
-            // 表单搜索
-            string searchText = searchMessage?.Trim();
-            if (!string.IsNullOrEmpty(searchText))
-            {
-                q = q.Where(o => o.Name.Contains(searchText));
-            }
-
-            if (pageInfo != null)
-            {
-                // 在添加条件之后，排序和分页之前获取总记录数
-                pageInfo.RecordCount = q.Count();
-
-                // 排列和数据库分页
-                q = SortAndPage(q, pageInfo);
-            }
-
-            var articles = q.ToList();
-
-            articles.ForEach(o => o.ArticleLabelArticles = m.Where(p => p.Article == o).ToList());
-
-            return articles.Select(o => new {
-                o.Guid, 
-                o.Name,
-                o.PublishDate,
-                o.ClickTraffic,
-                ArticleType = getArticleType ? new {
-                    o.ArticleType.Guid,
-                    o.ArticleType.Name
-                } : null,
-                ArticleLabels = getArticleLabels ? o.ArticleLabelArticles.Select(p => new {
-                    p.ArticleLabel.Guid,
-                    p.ArticleLabel.Name
-                }) : null,
-                text = getText ? GetArticleList_GetHtmlText(o.Content) : null
-            });
         }
 
         string GetArticleList_GetHtmlText(string html)
@@ -168,31 +129,8 @@ namespace Scottxu.Blog.Controllers
             {
                 PageInfo = pageInfo,
                 SearchMessage = searchMessage,
-                List = GetLabelList_GetData(pageInfo, searchMessage)
+                List = ArticleLabel.GetData(DataBaseContext, pageInfo, searchMessage).Select(o => new { o.Guid, o.Name }).ToList()
             };
-        }
-
-        object GetLabelList_GetData(PageInfoViewModel pageInfo, string searchMessage)
-        {
-            IQueryable<ArticleLabel> q = DataBaseContext.ArticleLabels;
-
-            // 表单搜索
-            string searchText = searchMessage?.Trim();
-            if (!string.IsNullOrEmpty(searchText))
-            {
-                q = q.Where(o => o.Name.Contains(searchText));
-            }
-
-            if (pageInfo != null)
-            {
-                // 在添加条件之后，排序和分页之前获取总记录数
-                pageInfo.RecordCount = q.Count();
-
-                // 排列和数据库分页
-                q = SortAndPage(q, pageInfo);
-            }
-
-            return q.Select(o => new { o.Guid, o.Name }).ToList();
         }
 
         // GET: /API/GetTypeList
@@ -205,28 +143,8 @@ namespace Scottxu.Blog.Controllers
 
         object GetTypeList_LoadData()
         {
-            (object childArticleTypes, int articlesCount) = GetTypeList_GetData();
+            (object childArticleTypes, int articlesCount) = ArticleType.GetTree(DataBaseContext);
             return childArticleTypes;
-        }
-
-        (IEnumerable<object>, int) GetTypeList_GetData(Guid? parentArticleTypeGuid = null)
-        {
-            IQueryable<ArticleType> q = DataBaseContext.ArticleTypes;
-
-            q = q.Include(o => o.Articles);
-
-            q = q.Where(o => o.ParentArticleTypeGuid == parentArticleTypeGuid);
-
-            q.OrderBy(o => o.Sequence);
-
-            var list = q.Select(o => new { o.Guid, o.Name, ArticlesCount = o.Articles.Count }).ToList()
-                    .Select(o => 
-            {
-                (object childArticleTypes, int articlesCount) = GetTypeList_GetData(o.Guid);
-                articlesCount += o.ArticlesCount;
-                return new { o.Guid, o.Name, ArticlesCount = articlesCount, ChildArticleTypes = childArticleTypes };
-            });
-            return (list, list.Sum(s => s.ArticlesCount));
         }
          
         //GET: /API/GetBaseInfo

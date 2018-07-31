@@ -17,7 +17,7 @@ namespace Scottxu.Blog.Models.Helper
             ArticleName
         }
 
-        public static bool FormatVerification(string verifyingString, FormatType formatType, Exception formatErrorExceptionType = null)
+        public static bool FormatVerification(string verifyingString, FormatType formatType, System.Exception formatErrorExceptionType = null)
         {
             var method = typeof(FormatVerificationHelper).GetMethod($"{formatType.ToString()}Verification");
             var pass = (bool)method.Invoke(null, new[] {verifyingString});

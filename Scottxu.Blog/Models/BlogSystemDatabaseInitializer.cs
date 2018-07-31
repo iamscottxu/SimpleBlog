@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Scottxu.Blog.Models.Entitys;
 using Scottxu.Blog.Models.Helper;
+using Scottxu.Blog.Models.Exception;
 
 namespace Scottxu.Blog.Models
 {
@@ -20,6 +21,16 @@ namespace Scottxu.Blog.Models
 
         internal static void Seed(HttpContext httpContext, BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment, Configs configs)
         {
+            FormatVerificationHelper.FormatVerification(
+                configs.Email, FormatVerificationHelper.FormatType.Email, new ParametersFormatErrorException("邮箱格式错误。"));
+            FormatVerificationHelper.FormatVerification(
+                configs.Password, FormatVerificationHelper.FormatType.Password, new ParametersFormatErrorException("密码格式错误。"));
+            FormatVerificationHelper.FormatVerification(
+                configs.BlogName, FormatVerificationHelper.FormatType.BlogName, new ParametersFormatErrorException("博客名称格式错误。"));
+            FormatVerificationHelper.FormatVerification(
+                configs.UserName, FormatVerificationHelper.FormatType.UserName, new ParametersFormatErrorException("昵称格式错误。"));
+            dataBaseContext.Database.EnsureDeleted();
+            dataBaseContext.Database.EnsureCreated();
             using (var transaction = dataBaseContext.Database.BeginTransaction())
             {
                 Config(dataBaseContext, configs);

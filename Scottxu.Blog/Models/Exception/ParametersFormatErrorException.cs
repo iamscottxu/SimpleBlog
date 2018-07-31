@@ -1,10 +1,7 @@
-﻿using System;
-namespace Scottxu.Blog.Models.Exception
+﻿namespace Scottxu.Blog.Models.Exception
 {
-    public class ParametersFormatErrorException
+    class ParametersFormatErrorException : System.Exception
     {
-        public ParametersFormatErrorException()
-        {
-        }
+        public ParametersFormatErrorException(string message) : base(message) { }
     }
 }

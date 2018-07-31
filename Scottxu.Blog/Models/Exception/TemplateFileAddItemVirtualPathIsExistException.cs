@@ -1,10 +1,8 @@
 ﻿using System;
 namespace Scottxu.Blog.Models.Exception
 {
-    public class TemplateFile_AddItemVirtualPathIsExistException
+    public class TemplateFileAddItemVirtualPathIsExistException : System.Exception
     {
-        public TemplateFile_AddItemVirtualPathIsExistException()
-        {
-        }
+        public TemplateFileAddItemVirtualPathIsExistException(string message) : base(message) { }
     }
 }
