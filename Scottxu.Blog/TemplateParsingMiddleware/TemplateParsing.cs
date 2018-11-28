@@ -27,7 +27,8 @@ namespace Scottxu.Blog.TemplateParsingMiddleware
         public async Task InvokeAsync(HttpContext context, BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment)
         {
             string requestUrl = HttpUtility.UrlDecode(context.Request.Path);
-            if (requestUrl.ToLower().StartsWith("/sys", StringComparison.Ordinal)) {
+            if (requestUrl.ToLower().StartsWith("/sys", StringComparison.Ordinal))
+            {
                 await _next(context);
                 return;
             }
@@ -37,9 +38,10 @@ namespace Scottxu.Blog.TemplateParsingMiddleware
                 return;
             }
 
-            var templateFile = getUploadedFile(dataBaseContext, requestUrl);
-                
-            if (templateFile == null) {
+            var templateFile = GetUploadedFile(dataBaseContext, requestUrl);
+
+            if (templateFile == null)
+            {
                 await _next(context);
                 return;
             }
@@ -52,14 +54,16 @@ namespace Scottxu.Blog.TemplateParsingMiddleware
                 return;
             }
             context.Response.ContentType = templateFile.MIME;
-            context.Response.Headers["Content-Disposition"] = 
-                $"{(context.Request.Query["download"].Count() > 0 ? "attachment;": string.Empty)}filename*={Encoding.Default.BodyName}''{HttpUtility.UrlEncode(templateFile.Name)}";
+            context.Response.Headers["Content-Disposition"] =
+                $"{(context.Request.Query["download"].Any() ? "attachment;" : string.Empty)}filename*={Encoding.Default.BodyName}''{HttpUtility.UrlEncode(templateFile.Name)}";
             context.Response.Headers["Content-Length"] = fileInfo.Length.ToString();
             await context.Response.SendFileAsync(fileInfo.FullName);
         }
 
-        TemplateFile getUploadedFile(BlogSystemContext dataBaseContext, string requestUrl){
-            if (requestUrl == "/") {
+        TemplateFile GetUploadedFile(BlogSystemContext dataBaseContext, string requestUrl)
+        {
+            if (requestUrl == "/")
+            {
                 var templateFile = dataBaseContext.TemplateFiles.Include(o => o.UploadedFile)
                                   .Where(p => p.VirtualPath == "/")
                                   .FirstOrDefault();

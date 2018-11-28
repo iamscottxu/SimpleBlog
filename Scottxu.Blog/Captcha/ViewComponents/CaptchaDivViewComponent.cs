@@ -1,10 +1,19 @@
 ﻿using System;
+using Microsoft.AspNetCore.Mvc;
+
 namespace Scottxu.Blog.Captcha.ViewComponents
 {
-    public class CaptchaDivViewComponent
+    [ViewComponent(Name = "CaptchaDiv")]
+    public class CaptchaDivViewComponent : ViewComponent
     {
-        public CaptchaDivViewComponent()
+        ICaptcha Captcha { get; }
+
+        public CaptchaDivViewComponent(ICaptcha captcha) => Captcha = captcha;
+
+        public IViewComponentResult Invoke()
         {
+            ViewContext.Writer.WriteLine(Captcha.GetDivString());
+            return Content(string.Empty);
         }
     }
 }

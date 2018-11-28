@@ -13,5 +13,18 @@
       "MySQLConnection": "Server=localhost;Database=Blog;User=root;Password=123456;", //MySQL连接字符串
       "SQLiteConnection": "", //SQLLite连接字符串
       "SQLServerConnection": "" //SQLServer连接字符串
-    }
+    },
+
+    "CaptchaType": "Disable", //验证码类（可选值：Disable、reCAPTCHAv2、reCAPTCHAv3）
+    "CaptchaOptions": {
+    //reCAPTCHAv2 配置项
+    //   "SiteKey": "",
+    //   "SecretKey": ""
+    /////////////////////////
+    //reCAPTCHAv3 配置项
+    //   "SiteKey": "",
+    //   "SecretKey": ""
+    //"AcceptScore": "0.5"   //通过验证的阈（大于等于此阈值则通过验证，否则视为机器）
+    /////////////////////////
+  }
   }

@@ -3,17 +3,15 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
 using Scottxu.Blog.Models;
 using Scottxu.Blog.TemplateParsingMiddleware;
+using Scottxu.Blog.Captcha;
 
 namespace Scottxu.Blog
 {
-    // <summary>
+    /// <summary>
     /// Web宿主入口类
     /// </summary>
     public class Startup
@@ -31,19 +29,9 @@ namespace Scottxu.Blog
         /// <param name="services">Services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            Action<DbContextOptionsBuilder> dbContextOptionsAction = null;
-            switch (Configuration["DataBaseType"]) {
-                case "SQLServer":
-                    dbContextOptionsAction = options => options.UseSqlServer(Configuration.GetConnectionString("SQLServerConnection"));
-                    break;
-                case "SQLite":
-                    dbContextOptionsAction = options => options.UseSqlite(Configuration.GetConnectionString("SQLiteConnection"));
-                    break;
-                case "MySQL":
-                    dbContextOptionsAction = options => options.UseMySql(Configuration.GetConnectionString("MySQLConnection"));
-                    break;
-            }
-            services.AddDbContext<BlogSystemContext>(dbContextOptionsAction);
+            var appSettings = new Models.Util.AppSettingsUtil(Configuration);
+
+            services.AddDbContext<BlogSystemContext>(appSettings.GetDbContextOptionsBuilder());
 
             services.AddAuthentication(options => {
                 options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -71,6 +59,8 @@ namespace Scottxu.Blog
                     HttpOnly = true
                 };
             });
+
+            services.AddCaptcha(Configuration);
 
             services.AddMvc();
 

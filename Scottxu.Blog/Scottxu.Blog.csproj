@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <ReleaseVersion>2018.7.2</ReleaseVersion>
+    <ReleaseVersion>2018.7.1</ReleaseVersion>
     <AssemblyVersion>2018.7.2</AssemblyVersion>
     <AssemblyFileVersion>2018.7.2</AssemblyFileVersion>
     <Authors>scottxu</Authors>
@@ -52,6 +52,8 @@
     <Folder Include="TemplateParsingMiddleware\" />
     <Folder Include="upload\" />
     <Folder Include="Models\Exception\" />
+    <Folder Include="Captcha\" />
+    <Folder Include="Captcha\ViewComponents\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="default-template.zip" />

@@ -21,7 +21,9 @@ namespace Scottxu.Blog.Controllers
     public class AdminController : BaseController
     {
         IHostingEnvironment HostingEnvironment { get; }
-        public AdminController(BlogSystemContext context, IHostingEnvironment hostingEnvironment) : base(context) => HostingEnvironment = hostingEnvironment;
+        Captcha.ICaptcha Captcha { get; }
+        public AdminController(BlogSystemContext context, IHostingEnvironment hostingEnvironment) : 
+            base(context) => HostingEnvironment = hostingEnvironment;
 
         #region 概览
         // GET: /Admin/

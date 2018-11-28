@@ -1,10 +1,8 @@
 ﻿using System;
 namespace Scottxu.Blog.Models.Exception
 {
-    public class ValidateCaptchaErrorException
+    public class ValidateCaptchaErrorException : System.Exception
     {
-        public ValidateCaptchaErrorException()
-        {
-        }
+        public ValidateCaptchaErrorException(string message) : base(message) { }
     }
 }

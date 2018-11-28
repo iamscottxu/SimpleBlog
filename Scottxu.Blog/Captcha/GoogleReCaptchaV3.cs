@@ -8,33 +8,29 @@ using System.Linq;
 
 namespace Scottxu.Blog.Captcha
 {
-    public class GoogleReCaptchaV2 : ICaptcha
+    public class GoogleReCaptchaV3 : ICaptcha
     {
         Options _options { get; }
 
-        public string HeadString
+        public string GetHeadString(string action)
         {
-            get
-            {
-                var stringBuilder = new StringBuilder();
-                stringBuilder.AppendLine("<script src='https://www.recaptcha.net/recaptcha/api.js'></script>");
-                stringBuilder.AppendLine("<script>");
-                stringBuilder.AppendLine("    getCaptchaText = function(loginFun, data) {");
-                stringBuilder.AppendLine("        loginFun(grecaptcha.getResponse(), data);");
-                stringBuilder.AppendLine("    }");
-                stringBuilder.AppendLine("    resetCaptcha = function() { grecaptcha.reset(); }");
-                stringBuilder.AppendLine("</script>");
-                return stringBuilder.ToString();
-            }
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine($"<script src='https://www.recaptcha.net/recaptcha/api.js?render={_options.SiteKey}'></script>");
+            stringBuilder.AppendLine("<script>");
+            stringBuilder.AppendLine("    getCaptchaText = function(loginFun, data) {");
+            stringBuilder.AppendLine("        grecaptcha.ready(function() {");
+            stringBuilder.AppendLine($"             grecaptcha.execute('{_options.SiteKey}',");
+            stringBuilder.AppendLine("                  {action: '" + action + "'}).then(function(token) {");
+            stringBuilder.AppendLine("                  loginFun(token, data);");
+            stringBuilder.AppendLine("             });");
+            stringBuilder.AppendLine("         });");
+            stringBuilder.AppendLine("    }");
+            stringBuilder.AppendLine("    resetCaptcha = function() { }");
+            stringBuilder.AppendLine("</script>");
+            return stringBuilder.ToString();
         }
 
-        public string DivString
-        {
-            get
-            {
-                return $"<div class='g-recaptcha' data-sitekey='{_options.ReCaptchaSiteKey}'></div>";
-            }
-        }
+        public string GetDivString() => string.Empty;
 
         public string Validate(string captcha, string ipAddress)
         {
@@ -46,15 +42,17 @@ namespace Scottxu.Blog.Captcha
                 JObject jObject;
                 using (var response = HttpRequestHelper.CreatePostResponse("https://www.recaptcha.net/recaptcha/api/siteverify", new Dictionary<string, string>
                     {
-                        { "secret", _options.ReCaptchaSecretKey },
+                        { "secret", _options.SecretKey },
                         { "response", captcha },
                         { "remoteip", ipAddress }
                     }))
                 {
                     jObject = (JObject)HttpRequestHelper.GetObjectFromJsonResponse(response);
                 }
-                return jObject.GetValue("success").Value<bool>() ? null 
-                                  : "人机验证时发生错误：" + string.Join(",", jObject["error-codes"].ToList());
+                return jObject.GetValue("success").Value<bool>()
+                    ? jObject.GetValue("score").Value<double>() >= _options.AcceptScore ?
+                              null : "人机验证未通过，你可能是机器。"
+                    : "人机验证时发生错误：" + string.Join(",", jObject["error-codes"].ToList());
             }
             catch (Exception ex)
             {
@@ -62,16 +60,18 @@ namespace Scottxu.Blog.Captcha
             }
         }
 
-        public GoogleReCaptchaV2(IOptions<Options> options)
+        public GoogleReCaptchaV3(IOptions<Options> options)
         {
             _options = options.Value;
         }
 
         public class Options : ICaptchaOptions
         {
-            public string ReCaptchaSiteKey { get; set;  }
+            public string SiteKey { get; set; }
 
-            public string ReCaptchaSecretKey { get; set; }
+            public string SecretKey { get; set; }
+
+            public double AcceptScore { get; set; }
         }
     }
 }

@@ -30,7 +30,7 @@ namespace Scottxu.Blog.Controllers
             var fileInfo = uploadHelper.GetFileInfo(uploadedFileArticle.UploadedFile);
             if (!fileInfo.Exists) return new NotFoundResult();
             Response.Headers["Content-Disposition"] =
-                        $"{(Request.Query["download"].Count() > 0 ? "attachment;" : string.Empty)}filename*={Encoding.Default.BodyName}''{HttpUtility.UrlEncode(uploadedFileArticle.Name)}";
+                        $"{(Request.Query["download"].Any() ? "attachment;" : string.Empty)}filename*={Encoding.Default.BodyName}''{HttpUtility.UrlEncode(uploadedFileArticle.Name)}";
             return File(fileInfo.OpenRead(), uploadedFileArticle.MIME);
         }
     }

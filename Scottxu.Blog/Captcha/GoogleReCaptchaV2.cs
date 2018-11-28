@@ -8,33 +8,25 @@ using System.Linq;
 
 namespace Scottxu.Blog.Captcha
 {
-    public class GoogleReCaptcha : ICaptcha
+    public class GoogleReCaptchaV2 : ICaptcha
     {
         Options _options { get; }
 
-        public string HeadString
+        public string GetHeadString(string action)
         {
-            get
-            {
-                var stringBuilder = new StringBuilder();
-                stringBuilder.AppendLine("<script src='https://www.recaptcha.net/recaptcha/api.js'></script>");
-                stringBuilder.AppendLine("<script>");
-                stringBuilder.AppendLine("    getCaptchaText = function(loginFun, data) {");
-                stringBuilder.AppendLine("        loginFun(grecaptcha.getResponse(), data);");
-                stringBuilder.AppendLine("    }");
-                stringBuilder.AppendLine("    resetCaptcha = function() { grecaptcha.reset(); }");
-                stringBuilder.AppendLine("</script>");
-                return stringBuilder.ToString();
-            }
+
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("<script src='https://www.recaptcha.net/recaptcha/api.js'></script>");
+            stringBuilder.AppendLine("<script>");
+            stringBuilder.AppendLine("    getCaptchaText = function(loginFun, data) {");
+            stringBuilder.AppendLine("        loginFun(grecaptcha.getResponse(), data);");
+            stringBuilder.AppendLine("    }");
+            stringBuilder.AppendLine("    resetCaptcha = function() { grecaptcha.reset(); }");
+            stringBuilder.AppendLine("</script>");
+            return stringBuilder.ToString();
         }
 
-        public string DivString
-        {
-            get
-            {
-                return $"<div class='g-recaptcha' data-sitekey='{_options.ReCaptchaSiteKey}'></div>";
-            }
-        }
+        public string GetDivString() => $"<div class='g-recaptcha' data-sitekey='{_options.SiteKey}'></div>";
 
         public string Validate(string captcha, string ipAddress)
         {
@@ -46,14 +38,14 @@ namespace Scottxu.Blog.Captcha
                 JObject jObject;
                 using (var response = HttpRequestHelper.CreatePostResponse("https://www.recaptcha.net/recaptcha/api/siteverify", new Dictionary<string, string>
                     {
-                        { "secret", _options.ReCaptchaSecretKey },
+                        { "secret", _options.SecretKey },
                         { "response", captcha },
                         { "remoteip", ipAddress }
                     }))
                 {
                     jObject = (JObject)HttpRequestHelper.GetObjectFromJsonResponse(response);
                 }
-                return jObject.GetValue("success").Value<bool>() ? null 
+                return jObject.GetValue("success").Value<bool>() ? null
                                   : "人机验证时发生错误：" + string.Join(",", jObject["error-codes"].ToList());
             }
             catch (Exception ex)
@@ -62,16 +54,16 @@ namespace Scottxu.Blog.Captcha
             }
         }
 
-        public GoogleReCaptcha(IOptions<Options> options)
+        public GoogleReCaptchaV2(IOptions<Options> options)
         {
             _options = options.Value;
         }
 
         public class Options : ICaptchaOptions
         {
-            public string ReCaptchaSiteKey { get; set;  }
+            public string SiteKey { get; set; }
 
-            public string ReCaptchaSecretKey { get; set; }
+            public string SecretKey { get; set; }
         }
     }
 }

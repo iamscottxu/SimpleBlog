@@ -1,6 +1,7 @@
 ﻿@{
     ViewBag.Title = "后台登录 - Simple Blog";
 }
+
 @section Head {
     <link rel="icon" type="image/png" href="~/sys/assets/admin/i/favicon.png">
     <link rel="apple-touch-icon-precomposed" href="~/sys/assets/admin/i/app-icon72x72@2x.png">
@@ -12,6 +13,7 @@
     <script src="~/sys/assets/admin/js/amazeui.min.js"></script>
     <script src="~/sys/assets/common/js/md5-min.js"></script>
     <script src="~/sys/assets/auth/js/index.js"></script>
+    @await Component.InvokeAsync("CaptchaHead", new { action = "admin_login"})
 }
 <div class="am-g myapp-login">
     <div class="myapp-login-logo-block  tpl-login-max">
@@ -30,10 +32,14 @@
             <form class="am-form">
                 <fieldset>
                     <div class="am-form-group login-am-center-first">
-                        <input type="email" required class="" placeholder="电子邮件" id="email">
+                        <input type="email" required class="" placeholder="电子邮箱地址" id="email">
                     </div>
                     <div class="am-form-group login-am-center-last">
                         <input type="password" minlength="8" maxlength="20" required class="" placeholder="密码" id="password">
+                    </div>
+                    <p></p>
+                    <div class="am-form-group">
+                        @await Component.InvokeAsync("CaptchaDiv")
                     </div>
                     <p><button type="submit" class="am-btn am-btn-default" data-am-loading="{spinner: 'circle-o-notch', loadingText: '正在登录……'}" id="btn_Login">登录</button></p>
                 </fieldset>
