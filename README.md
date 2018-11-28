@@ -10,12 +10,12 @@ Simple Blog 是一个使用 Asp.Net Core 开发的轻型跨平台博客系统。
 3.因为使用了ajax动态加载，搜索引擎可能无法正常爬取和收录，有待进一步优化。
 
 ## 快速开始
-1.如果要开始使用，建议安装MySql数据库系统，并修改“Scottxu.Blog/appsettions.example.json”配置文件，并重命名为“Scottxu.Blog/appsettions.json”。
+1.如果要开始使用，建议安装MySql数据库系统，并修改“Scottxu.Blog/appsettions.example.json”配置文件，并重命名为“Scottxu.Blog/appsettions.json”。<br/>
 2.请手动创建“Scottxu.Blog/upload”文件夹，否则系统无法初始化。
 
 ## 联系作者
 如果有任何问题请写Issus。<br/>
-Email：xyc0714@aliyun.com
+Email：scottxu@scottxublog.com
 
 ## 版权说明
 本程序使用并遵循MIT开源许可，所引用的开源代码都在“Scottxu.Blog/wwwroot/sys/license.html”中声明。
