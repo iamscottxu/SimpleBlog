@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <ReleaseVersion>2018.11.28</ReleaseVersion>
+    <ReleaseVersion>2018.7.1</ReleaseVersion>
     <AssemblyVersion>2018.11.28</AssemblyVersion>
     <AssemblyFileVersion>2018.11.28</AssemblyFileVersion>
     <Authors>scottxu</Authors>
@@ -29,7 +29,7 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.1.6" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="HtmlAgilityPack" Version="1.8.10" />
   </ItemGroup>
 
