@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <ReleaseVersion>2018.7.1</ReleaseVersion>
+    <ReleaseVersion>2018.11.28</ReleaseVersion>
     <AssemblyVersion>2018.11.28</AssemblyVersion>
     <AssemblyFileVersion>2018.11.28</AssemblyFileVersion>
     <Authors>scottxu</Authors>
@@ -20,7 +20,6 @@
     <LangVersion>Latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.1" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.4" />
@@ -31,6 +30,7 @@
     <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="HtmlAgilityPack" Version="1.8.10" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.6" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,11 +54,5 @@
     <Folder Include="Models\Exception\" />
     <Folder Include="Captcha\" />
     <Folder Include="Captcha\ViewComponents\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="default-template.zip" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="default-template.zip" />
   </ItemGroup>
 </Project>
