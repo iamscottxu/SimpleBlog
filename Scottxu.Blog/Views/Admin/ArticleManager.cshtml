@@ -13,9 +13,9 @@
             z-index: 999 !important;
         }
     </style>
-    <script src="~/sys/ueditor/ueditor.config.js"></script>
-    <script src="~/sys/ueditor/ueditor.all.min.js"></script>
-    <script src="~/sys/assets/admin/js/articlemanager.js"></script>
+    <script blog-src="ueditor/ueditor.config.js"></script>
+    <script blog-src="ueditor/ueditor.all.min.js"></script>
+    <script blog-src="assets/admin/js/articlemanager.js"></script>
 }
 <div class="tpl-portlet-components">
     <div class="portlet-title">
@@ -71,7 +71,7 @@
                 </div>
             </form>
         </div>
-        <form asp-controller="Admin" asp-action="ArticleManager_Delete" method="post" id="table_form">
+        <form blog-admin-action="ArticleManager_Delete" method="post" id="table_form">
             <ul class="tpl-task-list">
                 @foreach (var article in Model.Articles)
                 {
@@ -129,7 +129,7 @@
                   class="am-close"><span class="am-icon-times"></span></span>
         </div>
         <div class="am-popup-bd" style="height:100%;width:100%;">
-            <form class="am-form" style="text-align:left;" id="add_item_form" asp-controller="Admin" asp-action="ArticleManager_AddItem" method="post">
+            <form class="am-form" style="text-align:left;" id="add_item_form" blog-admin-action="ArticleManager_AddItem" method="post">
                 <div class="am-form-group">
                     <label for="add_item_name">标题</label>
                     <input type="text" id="add_item_name" name="name" placeholder="输入标题" required/>
@@ -176,7 +176,7 @@
                   class="am-close"><span class="am-icon-times"></span></span>
         </div>
         <div class="am-popup-bd" style="height:100%;width:100%;">
-            <form class="am-form" style="text-align:left;" id="edit_item_form" asp-controller="Admin" asp-action="ArticleManager_EditItem" method="post">
+            <form class="am-form" style="text-align:left;" id="edit_item_form" blog-admin-action="ArticleManager_EditItem" method="post">
                 <input type="hidden" name="guid" id="edit_item_guid">
                 <div class="am-form-group">
                     <label for="edit_item_name">标题</label>

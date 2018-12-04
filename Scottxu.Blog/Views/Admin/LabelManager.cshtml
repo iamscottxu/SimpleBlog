@@ -4,7 +4,7 @@
 }
 @model Scottxu.Blog.Models.ViewModel.Admin.LabelManagerViewModel
 @section Head {
-    <script src="~/sys/assets/admin/js/labelmanager.js"></script>
+    <script blog-src="assets/admin/js/labelmanager.js"></script>
 }
 <div class="tpl-portlet-components">
     <div class="portlet-title">
@@ -36,7 +36,7 @@
     </div>
     <div class="am-g">
         <div class="am-u-sm-12">
-            <form asp-controller="Admin" asp-action="LabelManager_Delete" method="post" id="table_form">
+            <form blog-admin-action="LabelManager_Delete" method="post" id="table_form">
                 <table class="am-table am-table-striped am-table-hover table-main">
                     <thead>
                         <tr>
@@ -81,7 +81,7 @@
             <a class="am-close am-close-spin" data-am-modal-close><span class="am-icon-times"></span></a>
         </div>
         <div class="am-modal-bd">
-            <form class="am-form" style="text-align:left;" id="add_item_form" asp-controller="Admin" asp-action="LabelManager_AddItem" method="post">
+            <form class="am-form" style="text-align:left;" id="add_item_form" blog-admin-action="LabelManager_AddItem" method="post">
                 <div class="am-form-group">
                     <label for="add_item_name">标签名</label>
                     <input type="text" class="" id="add_item_name" name="name" placeholder="输入标签名" maxlength="50" required>
@@ -102,7 +102,7 @@
             <a class="am-close am-close-spin" data-am-modal-close><span class="am-icon-times"></span></a>
         </div>
         <div class="am-modal-bd">
-            <form class="am-form" style="text-align: left;" id="edit_item_form" asp-controller="Admin" asp-action="LabelManager_EditItem" method="post">
+            <form class="am-form" style="text-align: left;" id="edit_item_form" blog-admin-action="LabelManager_EditItem" method="post">
                 <input type="hidden" name="guid" id="edit_item_guid">
                 <div class="am-form-group">
                     <label for="edit_item_name">标签名</label>

@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Web;
 using System.Text;
 using Scottxu.Blog.Models.Helper;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace Scottxu.Blog.TemplateParsingMiddleware
 {
@@ -24,19 +26,22 @@ namespace Scottxu.Blog.TemplateParsingMiddleware
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment)
+        public async Task InvokeAsync(HttpContext context, BlogSystemContext dataBaseContext, IOptions<SiteOptions> options, IHostingEnvironment hostingEnvironment)
         {
             string requestUrl = HttpUtility.UrlDecode(context.Request.Path);
-            if (requestUrl.ToLower().StartsWith("/sys", StringComparison.Ordinal))
+            //如果路径不是以/blog就跳过
+            if (!requestUrl.ToLower().StartsWith("/blog", StringComparison.Ordinal))
             {
                 await _next(context);
                 return;
             }
             if (!dataBaseContext.DataBaseIsExist)
             {
-                context.Response.Redirect("/sys/Setup");
+                context.Response.Redirect(string.IsNullOrEmpty(options.Value.AdminUrl) ? "~/Admin/Setup" : $"{options.Value.AdminUrl}/Setup");
                 return;
             }
+            requestUrl = requestUrl.Remove(0, 5);
+            if (string.IsNullOrEmpty(requestUrl)) requestUrl = "/";
 
             var templateFile = GetUploadedFile(dataBaseContext, requestUrl);
 
@@ -53,6 +58,17 @@ namespace Scottxu.Blog.TemplateParsingMiddleware
                 context.Response.StatusCode = 404;
                 return;
             }
+            //向Cookie添加站点设置信息
+            context.Response.Cookies.Append("SimpleBlog_Settings", JsonConvert.SerializeObject(new
+            {
+                adminUrl = options.Value.GetAdminUrl(string.Empty, context.Request.PathBase),
+                apiUrl = options.Value.GetApiUrl(string.Empty, context.Request.PathBase)
+            }), new CookieOptions()
+            {
+                HttpOnly = false,
+                Path = string.IsNullOrEmpty(options.Value.HomeUrl) ? options.Value.GetHomeUrl(string.Empty, context.Request.PathBase) : "/"
+            });
+
             context.Response.ContentType = templateFile.MIME;
             context.Response.Headers["Content-Disposition"] =
                 $"{(context.Request.Query["download"].Any() ? "attachment;" : string.Empty)}filename*={Encoding.Default.BodyName}''{HttpUtility.UrlEncode(templateFile.Name)}";

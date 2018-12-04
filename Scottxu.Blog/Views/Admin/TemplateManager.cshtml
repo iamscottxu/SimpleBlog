@@ -4,7 +4,7 @@
 }
 @model Scottxu.Blog.Models.ViewModel.Admin.TemplateManagerViewModel
 @section Head {
-    <script src="~/sys/assets/admin/js/templatemanager.js"></script>
+    <script blog-src="assets/admin/js/templatemanager.js"></script>
 }
 <div class="tpl-portlet-components">
     <div class="portlet-title">
@@ -37,7 +37,7 @@
     </div>
     <div class="am-g">
         <div class="am-u-sm-12">
-            <form asp-controller="Admin" asp-action="TemplateManager_Delete" method="post" id="table_form">
+            <form blog-admin-action="TemplateManager_Delete" method="post" id="table_form">
                 <table class="am-table am-table-striped am-table-hover table-main">
                     <thead>
                         <tr>
@@ -86,7 +86,7 @@
             <a class="am-close am-close-spin" data-am-modal-close><span class="am-icon-times"></span></a>
         </div>
         <div class="am-modal-bd">
-            <form class="am-form" style="text-align:left;" id="add_item_form" asp-controller="Admin" asp-action="TemplateManager_AddItem" method="post">
+            <form class="am-form" style="text-align:left;" id="add_item_form" blog-admin-action="TemplateManager_AddItem" method="post">
                 <div class="am-form-group">
                     <label for="add_item_virtualpath">虚拟路径</label>
                     <input type="text" class="" id="add_item_virtualpath" name="virtualPath" placeholder="输入虚拟路径" required pattern='(^(\/[^\\\/:*?"<>\|]+)+$)|(^\/$)' maxlength="500">
@@ -116,7 +116,7 @@
             <a class="am-close am-close-spin" data-am-modal-close><span class="am-icon-times"></span></a>
         </div>
         <div class="am-modal-bd">
-            <form class="am-form" style="text-align: left;" id="edit_item_form" asp-controller="Admin" asp-action="TemplateManager_EditItem" method="post">
+            <form class="am-form" style="text-align: left;" id="edit_item_form" blog-admin-action="TemplateManager_EditItem" method="post">
                 <input type="hidden" name="guid" id="edit_item_guid">
                 <div class="am-form-group">
                     <label for="edit_item_virtualpath">虚拟路径</label>
@@ -138,7 +138,7 @@
             <a class="am-close am-close-spin" data-am-modal-close><span class="am-icon-times"></span></a>
         </div>
         <div class="am-modal-bd">
-            <form class="am-form" style="text-align:left;" id="upload_zip_form" asp-controller="Admin" asp-action="TemplateManager_UploadZip" method="post">
+            <form class="am-form" style="text-align:left;" id="upload_zip_form" blog-admin-action="TemplateManager_UploadZip" method="post">
                 <div class="am-alert am-alert-danger">
                     <p>警告：上传压缩包将会删除原有模板。</p>
                 </div>

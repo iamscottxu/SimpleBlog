@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Options;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,8 +17,10 @@ namespace Scottxu.Blog.Controllers
     public class BaseController : Controller
     {
         internal BlogSystemContext DataBaseContext { get; }
+        
+        internal SiteOptions Options { get; }
 
-        internal enum OSPlatformEnum 
+        internal enum OSPlatformEnum
         {
             Linux,
             Windows,
@@ -25,7 +28,7 @@ namespace Scottxu.Blog.Controllers
             Unknowed
         }
 
-        internal OSPlatformEnum OSPlatform 
+        internal OSPlatformEnum OSPlatform
         {
             get
             {
@@ -38,12 +41,13 @@ namespace Scottxu.Blog.Controllers
 
         internal Version AssemblyVersion => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
 
-        internal BaseController(BlogSystemContext context)
+        internal BaseController(BlogSystemContext context, IOptions<SiteOptions> options)
         {
             DataBaseContext = context;
+            Options = options.Value;
         }
 
-        class JsonResult 
+        class JsonResult
         {
             public bool Success { get; set; }
             public string ErrorType { get; set; }
@@ -51,9 +55,10 @@ namespace Scottxu.Blog.Controllers
             public object Data { get; set; }
         }
 
-        internal class ApiAction : Attribute {}
+        internal class ApiAction : Attribute { }
 
-        internal async Task UserLoginAsync(string email){
+        internal async Task UserLoginAsync(string email)
+        {
             var identity = new ClaimsIdentity("Forms");
             identity.AddClaim(new Claim(ClaimTypes.Email, email));
             var principal = new ClaimsPrincipal(identity);
@@ -72,12 +77,12 @@ namespace Scottxu.Blog.Controllers
                 context.Result = RedirectToAction(String.Empty, "Setup");
         }
 
-        public override void OnActionExecuted(ActionExecutedContext context) 
+        public override void OnActionExecuted(ActionExecutedContext context)
         {
             var controllerActionDescriptor = (ControllerActionDescriptor)context.ActionDescriptor;
             var controllerActionMethodInfo = controllerActionDescriptor.MethodInfo;
             var apiActionAttributes = controllerActionMethodInfo.GetCustomAttributes(typeof(ApiAction), false);
-            if (apiActionAttributes.Count() > 0)
+            if (apiActionAttributes.Any())
             {
                 if (context.Exception != null)
                 {
@@ -98,3 +103,4 @@ namespace Scottxu.Blog.Controllers
         }
     }
 }
+

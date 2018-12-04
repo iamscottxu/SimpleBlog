@@ -48,11 +48,13 @@
     <Folder Include="Models\ViewModel\" />
     <Folder Include="Models\ViewModel\Home\" />
     <Folder Include="Models\ViewModel\Admin\" />
-    <Folder Include="wwwroot\sys\" />
+    <Folder Include="wwwroot\cdn\" />
     <Folder Include="TemplateParsingMiddleware\" />
     <Folder Include="upload\" />
     <Folder Include="Models\Exception\" />
     <Folder Include="Captcha\" />
     <Folder Include="Captcha\ViewComponents\" />
+    <Folder Include="TagHelpers\" />
+    <Folder Include="Views\Account\" />
   </ItemGroup>
 </Project>

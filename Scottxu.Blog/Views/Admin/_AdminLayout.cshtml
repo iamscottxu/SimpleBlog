@@ -3,19 +3,19 @@
     ViewBag.Title = " - 后台管理";
 }
 @section Head {
-    <link rel="icon" type="image/png" href="~/sys/assets/admin/i/favicon.png">
-    <link rel="apple-touch-icon-precomposed" href="~/sys/assets/admin/i/app-icon72x72@2x.png">
+    <link rel="icon" type="image/png" blog-href="assets/admin/i/favicon.png">
+    <link rel="apple-touch-icon-precomposed" blog-href="assets/admin/i/app-icon72x72@2x.png">
     <meta name="apple-mobile-web-app-title" content="Simple Blog" />
-    <link rel="stylesheet" href="~/sys/assets/admin/css/amazeui.min.css" />
-    <link rel="stylesheet" href="~/sys/assets/admin/css/amazeui.chosen.css" />
-    <link rel="stylesheet" href="~/sys/assets/admin/css/chosen.css" />
-    <link rel="stylesheet" href="~/sys/assets/admin/css/admin.css">
-    <link rel="stylesheet" href="~/sys/assets/admin/css/app.css">
-    <script src="~/sys/assets/admin/js/jquery.min.js"></script>
-    <script src="~/sys/assets/admin/js/amazeui.min.js"></script>
-    <script src="~/sys/assets/admin/js/amazeui.chosen.min.js"></script>
-    <script src="~/sys/assets/admin/js/echarts.min.js"></script>
-    <script src="~/sys/assets/admin/js/common.js"></script>
+    <link rel="stylesheet" blog-href="assets/admin/css/amazeui.min.css" />
+    <link rel="stylesheet" blog-href="assets/admin/css/amazeui.chosen.css" />
+    <link rel="stylesheet" blog-href="assets/admin/css/chosen.css" />
+    <link rel="stylesheet" blog-href="assets/admin/css/admin.css">
+    <link rel="stylesheet" blog-href="assets/admin/css/app.css">
+    <script blog-src="assets/admin/js/jquery.min.js"></script>
+    <script blog-src="assets/admin/js/amazeui.min.js"></script>
+    <script blog-src="assets/admin/js/amazeui.chosen.min.js"></script>
+    <script blog-src="assets/admin/js/echarts.min.js"></script>
+    <script blog-src="assets/admin/js/common.js"></script>
     <script>
         $(function() {
             let li = $('#menu_@(ViewBag.PageName)');
@@ -30,7 +30,7 @@
 <header class="am-topbar am-topbar-inverse admin-header">
     <div class="am-topbar-brand">
         <a href="/" class="tpl-logo">
-            <img src="~/sys/assets/admin/img/logo.png" alt="">
+            <img blog-src="assets/admin/img/logo.png" alt="">
         </a>
     </div>
     <div class="am-icon-list tpl-header-nav-hover-ico am-fl am-margin-right">
@@ -47,15 +47,15 @@
 
             <li class="am-dropdown" data-am-dropdown data-am-dropdown-toggle>
                 <a class="am-dropdown-toggle tpl-header-list-link" href="javascript:;">
-                    <span class="tpl-header-list-user-nick">@(ViewBag.userName)</span><span class="tpl-header-list-user-ico"> <img src="~/sys/assets/admin/img/user01.png"></span>
+                    <span class="tpl-header-list-user-nick">@(ViewBag.userName)</span><span class="tpl-header-list-user-ico"> <img blog-src="assets/admin/img/user01.png"></span>
                 </a>
                 <ul class="am-dropdown-content">
                     <li><a href="#"><span class="am-icon-bell-o"></span> 资料</a></li>
                     <li><a href="#"><span class="am-icon-cog"></span> 设置</a></li>
-                    <li><a asp-controller="Auth" asp-action="Logout"><span class="am-icon-power-off"></span> 退出</a></li>
+                    <li><a href="~/GoAccount/Logout"><span class="am-icon-power-off"></span> 退出</a></li>
                 </ul>
             </li>
-            <li><a asp-controller="Auth" asp-action="Logout" class="tpl-header-list-link"><span class="am-icon-sign-out tpl-header-list-ico-out-size"></span></a></li>
+            <li><a href="~/GoAccount/Logout" class="tpl-header-list-link"><span class="am-icon-sign-out tpl-header-list-ico-out-size"></span></a></li>
         </ul>
     </div>
 </header>
@@ -68,13 +68,13 @@
         <div class="tpl-left-nav-list">
             <ul class="tpl-left-nav-menu">
                 <li class="tpl-left-nav-item" id="menu_home">
-                    <a href="~/sys/Admin" class="nav-link">
+                    <a blog-admin-href="" class="nav-link">
                         <i class="am-icon-home"></i>
                         <span>概览</span>
                     </a>
                 </li>
                 <li class="tpl-left-nav-item" id="menu_article">
-                    <a href="~/sys/Admin/ArticleManager" class="nav-link tpl-left-nav-link-list">
+                    <a blog-admin-href="ArticleManager" class="nav-link tpl-left-nav-link-list">
                         <i class="am-icon-clone"></i>
                         <span>文章管理</span>
                         <i class="tpl-left-nav-content tpl-badge-danger">
@@ -83,7 +83,7 @@
                     </a>
                 </li>
                 <li class="tpl-left-nav-item" id="menu_type">
-                    <a href="~/sys/Admin/TypeManager" class="nav-link tpl-left-nav-link-list">
+                    <a blog-admin-href="TypeManager" class="nav-link tpl-left-nav-link-list">
                         <i class="am-icon-folder-o"></i>
                         <span>类别管理</span>
                         <i class="tpl-left-nav-content tpl-badge-danger">
@@ -92,7 +92,7 @@
                     </a>
                 </li>
                 <li class="tpl-left-nav-item" id="menu_label">
-                    <a href="~/sys/Admin/LabelManager" class="nav-link tpl-left-nav-link-list">
+                    <a blog-admin-href="LabelManager" class="nav-link tpl-left-nav-link-list">
                         <i class="am-icon-hashtag"></i>
                         <span>标签管理</span>
                         <i class="tpl-left-nav-content tpl-badge-danger">
@@ -101,7 +101,7 @@
                     </a>
                 </li>
                 <li class="tpl-left-nav-item" id="menu_template">
-                    <a href="~/sys/Admin/TemplateManager" class="nav-link">
+                    <a blog-admin-href="TemplateManager" class="nav-link">
                         <i class="am-icon-file-o"></i>
                         <span>模板管理</span>
                     </a>
@@ -114,7 +114,7 @@
         </div>
         <ol class="am-breadcrumb">
             <li><a href="/" class="am-icon-home">首页</a></li>
-            <li><a href="/sys/Admin">博客管理</a></li>
+            <li><a blog-admin-href="">博客管理</a></li>
             <li class="am-active page-title"></li>
         </ol>
         @RenderBody()
@@ -162,5 +162,5 @@
         </div>
     </div>
 </div>
-<script src="~/sys/assets/admin/js/iscroll.js"></script>
-<script src="~/sys/assets/admin/js/app.js"></script>
+<script blog-src="assets/admin/js/iscroll.js"></script>
+<script blog-src="assets/admin/js/app.js"></script>

@@ -5,6 +5,7 @@ using System.Web;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Scottxu.Blog.Models;
 using Scottxu.Blog.Models.Helper;
 
@@ -15,10 +16,9 @@ namespace Scottxu.Blog.Controllers
     public class FileController : BaseController
     {
         IHostingEnvironment HostingEnvironment { get; }
-        public FileController(BlogSystemContext context, IHostingEnvironment hostingEnvironment) : base(context) => HostingEnvironment = hostingEnvironment;
+        public FileController(BlogSystemContext context, IOptions<SiteOptions> options, IHostingEnvironment hostingEnvironment) : base(context, options) => HostingEnvironment = hostingEnvironment;
 
         // GET: /File/{articleGuid}/{uploadedFileGuid}
-        [Route("sys/File/{articleGuid}/{uploadedFileGuid}")]
         public IActionResult Get(Guid articleGuid, Guid uploadedFileGuid)
         {
             var uploadedFileArticle = DataBaseContext.UploadedFileArticles

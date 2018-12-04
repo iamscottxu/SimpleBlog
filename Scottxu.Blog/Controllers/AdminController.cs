@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
 using System;
 using Scottxu.Blog.Models.Exception;
+using Microsoft.Extensions.Options;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,8 +23,8 @@ namespace Scottxu.Blog.Controllers
     {
         IHostingEnvironment HostingEnvironment { get; }
         Captcha.ICaptcha Captcha { get; }
-        public AdminController(BlogSystemContext context, IHostingEnvironment hostingEnvironment) : 
-            base(context) => HostingEnvironment = hostingEnvironment;
+        public AdminController(BlogSystemContext context, IOptions<SiteOptions> options, IHostingEnvironment hostingEnvironment) : 
+            base(context, options) => HostingEnvironment = hostingEnvironment;
 
         #region 概览
         // GET: /Admin/

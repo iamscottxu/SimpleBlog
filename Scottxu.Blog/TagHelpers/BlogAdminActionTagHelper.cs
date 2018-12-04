@@ -6,11 +6,10 @@ using Scottxu.Blog.Models;
 
 namespace Scottxu.Blog.TagHelpers
 {
-    [HtmlTargetElement(Attributes = "blog-href", TagStructure = TagStructure.WithoutEndTag)]
-    [HtmlTargetElement(Attributes = "blog-href")]
-    public class BlogHrefTagHelper : TagHelper
+    [HtmlTargetElement(Attributes = "blog-admin-action")]
+    public class BlogAdminActionTagHelper : TagHelper
     {
-        public string BlogHref { get; set; }
+        public string BlogAdminAction { get; set; }
 
         [ViewContext]
         [HtmlAttributeNotBound]
@@ -19,8 +18,8 @@ namespace Scottxu.Blog.TagHelpers
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
             var options = (IOptions<SiteOptions>)ViewContext.ViewData["SiteOptions"];
-            output.Attributes.RemoveAll("blog-href");
-            output.Attributes.SetAttribute("href", options.Value.GetCDNUrl(BlogHref, ViewContext.HttpContext.Request.PathBase));
+            output.Attributes.RemoveAll("blog-admin-action");
+            output.Attributes.SetAttribute("action", options.Value.GetAdminUrl(BlogAdminAction, ViewContext.HttpContext.Request.PathBase));
         }
     }
 }

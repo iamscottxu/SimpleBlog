@@ -7,6 +7,8 @@ using Scottxu.Blog.Models.ViewModel;
 using Scottxu.Blog.Models.Helper;
 using Microsoft.EntityFrameworkCore;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,7 +16,7 @@ namespace Scottxu.Blog.Controllers
 {
     public class APIController : BaseController
     {
-        public APIController(BlogSystemContext context) : base(context) { }
+        public APIController(BlogSystemContext context, IOptions<SiteOptions> options) : base(context, options) { }
 
         public class APIModel
         {

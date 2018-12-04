@@ -10,9 +10,7 @@
   
     "DataBaseType": "MySQL", //数据库类型（可选值：MySQL、SQLite、SQLServer）
     "ConnectionStrings": {
-      "MySQLConnection": "Server=localhost;Database=Blog;User=root;Password=123456;", //MySQL连接字符串
-      "SQLiteConnection": "", //SQLLite连接字符串
-      "SQLServerConnection": "" //SQLServer连接字符串
+      "BloggingDatabase": "Server=localhost;Database=Blog;User=root;Password=123456;", //连接字符串
     },
 
     "CaptchaType": "Disable", //验证码类（可选值：Disable、reCAPTCHAv2、reCAPTCHAv3）
@@ -26,5 +24,9 @@
     //   "SecretKey": ""
     //"AcceptScore": "0.5"   //通过验证的阈（大于等于此阈值则通过验证，否则视为机器）
     /////////////////////////
-  }
+    },
+
+    "ForwardedHeadersOptions": { //转接头中间件选项选（https://docs.microsoft.com/zh-cn/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-2.1）
+      "KnownProxies": ["::1"]
+    }
   }

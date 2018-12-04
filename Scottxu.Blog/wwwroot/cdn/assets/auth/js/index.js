@@ -32,7 +32,7 @@ $(function () {
         } else {
             $.ajax({
                 type: 'POST',
-                url: window.location.pathname + '/Login',
+                url: window.location.pathname + '/PostBack',
                 data: {
                     'email': data.email,
                     'password': hex_md5(hex_md5(data.password)),

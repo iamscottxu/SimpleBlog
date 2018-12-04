@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Scottxu.Blog.Models;
 using Scottxu.Blog.Models.Exception;
-using Scottxu.Blog.Models.Helper;
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Scottxu.Blog.Controllers
@@ -12,7 +12,7 @@ namespace Scottxu.Blog.Controllers
     public class SetupController : BaseController
     {
         IHostingEnvironment HostingEnvironment { get; }
-        public SetupController(BlogSystemContext context, IHostingEnvironment hostingEnvironment) : base(context) => HostingEnvironment = hostingEnvironment;
+        public SetupController(BlogSystemContext context, IOptions<SiteOptions> options, IHostingEnvironment hostingEnvironment) : base(context, options) => HostingEnvironment = hostingEnvironment;
 
         // GET: /Setup
         public IActionResult Index()

@@ -16,7 +16,7 @@ namespace Scottxu.Blog.Captcha
             var stringBuilder = new StringBuilder();
             stringBuilder.AppendLine("<script>");
             stringBuilder.AppendLine("    getCaptchaText = function(loginFun, data) {");
-            stringBuilder.AppendLine("        loginFun('', data);");
+            stringBuilder.AppendLine("        loginFun('.', data);");
             stringBuilder.AppendLine("    }");
             stringBuilder.AppendLine("    resetCaptcha = function() { }");
             stringBuilder.AppendLine("</script>");

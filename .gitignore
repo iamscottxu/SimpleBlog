@@ -12,6 +12,7 @@ TestResults/
 
 # photoshop
 *.psd
+*.ai
 
 # vscode
 .vscode/

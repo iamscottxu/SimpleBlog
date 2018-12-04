@@ -69,7 +69,7 @@ namespace Scottxu.Blog.Models.Helper
         public List<FormFileInfo> SaveFiles(HttpContext httpContext)
         {
             var request = httpContext.Request;
-            var session = httpContext.Session;
+            //var session = httpContext.Session;
             var formFileInfos = request.Form.Files.ToList().Select(q =>
             {
                 var formFileInfo = new FormFileInfo()
@@ -83,7 +83,7 @@ namespace Scottxu.Blog.Models.Helper
                 {
                     FileName = SaveFileToDisk(q.OpenReadStream()),
                     SHA1 = sha1,
-                    SessionId = session.Id
+                    //SessionId = session.Id
                 };
                 else formFileInfo.UploadedFile = uploadedFile;
                 return formFileInfo;
@@ -101,7 +101,6 @@ namespace Scottxu.Blog.Models.Helper
         public List<FormFileInfo> SaveZipFiles(HttpContext httpContext)
         {
             var request = httpContext.Request;
-            var session = httpContext.Session;
             var formFile = request.Form.Files[0];
             return SaveZipFiles(httpContext, formFile.OpenReadStream());
         }
@@ -113,7 +112,7 @@ namespace Scottxu.Blog.Models.Helper
         /// <param name="httpContext">Http上下文</param>
         public List<FormFileInfo> SaveZipFiles(HttpContext httpContext, Stream fileStream)
         {
-            var session = httpContext.Session;
+            //var session = httpContext.Session;
             List<FormFileInfo> formFileInfos = new List<FormFileInfo>();
             using (var zipInputStream = new ZipInputStream(fileStream))
             {
@@ -137,7 +136,7 @@ namespace Scottxu.Blog.Models.Helper
                             {
                                 FileName = fileName,
                                 SHA1 = sha1,
-                                SessionId = session.Id
+                                //SessionId = session.Id
                             };
                         }
                         var formFileInfo = new FormFileInfo()
@@ -243,8 +242,7 @@ namespace Scottxu.Blog.Models.Helper
         {
             string extensionName = Path.GetExtension(fileName);
             var fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
-            string value;
-            if (!fileExtensionContentTypeProvider.Mappings.TryGetValue(extensionName, out value))
+            if (!fileExtensionContentTypeProvider.Mappings.TryGetValue(extensionName, out string value))
                 value = "application/octet-stream";
             return value;
         }

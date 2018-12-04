@@ -37,19 +37,11 @@ namespace Scottxu.Blog
                 options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            }).AddCookie(options => {
-                options.LoginPath = "/sys/Auth";
-                options.AccessDeniedPath = "/sys/Home/Denied";
-                options.LogoutPath = "/sys/Auth/Logout";
-                options.Cookie.Name = "SimpleBlog_AuthTicket";
-                options.Cookie.Path = "/";
-                options.Cookie.HttpOnly = true;
-                options.Cookie.HttpOnly = true;
-                options.Cookie.Expiration = TimeSpan.FromDays(150);
-                options.ExpireTimeSpan = TimeSpan.FromDays(150);
-            });
+            }).AddCookie(appSettings.GetCookieAuthenticationOptions());
 
+            /*
             services.AddDistributedMemoryCache();
+
             services.AddSession(options =>
             {
                 options.Cookie = new CookieBuilder()
@@ -59,12 +51,17 @@ namespace Scottxu.Blog
                     HttpOnly = true
                 };
             });
+            */
 
             services.AddCaptcha(Configuration);
 
             services.AddMvc();
 
             services.AddTransient<TemplateParsing>();
+
+            services.Configure<ForwardedHeadersOptions>(Configuration.GetSection("ForwardedHeadersOptions"));
+
+            services.Configure<SiteOptions>(Configuration.GetSection("SiteOptions"));
         }
 
         /// <summary>
@@ -74,28 +71,89 @@ namespace Scottxu.Blog
         /// <param name="env">提供了访问应用程序属性，如环境变量</param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseForwardedHeaders();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             else
             {
-                app.UseExceptionHandler("/sys/Home/Error");
+                app.UseExceptionHandler("/Error");
             }
 
-            app.UseStatusCodePagesWithReExecute("/sys/Home/Error/{0}");
+            app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
             app.UseStaticFiles();
 
             app.UseAuthentication();
 
-            app.UseSession();
+            //app.UseSession();
             
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
-                    name: "default",
-                    template: "sys/{controller=Home}/{action=Index}/{id?}");
+                    name: "home",
+                    template: "{action=Index}",
+                    defaults: new { controller = "Home" }
+                );
+                routes.MapRoute(
+                    name: "goAccount_admin",
+                    template: "Admin/GoAccount/{accountAction}",
+                    defaults: new { controller = "Home", action = "GoAccount" }
+                );
+                routes.MapRoute(
+                    name: "goAccount_account",
+                    template: "Account/GoAccount/{accountAction}",
+                    defaults: new { controller = "Home", action = "GoAccount" }
+                );
+                routes.MapRoute(
+                    name: "account",
+                    template: "Account/{action=Index}",
+                    defaults: new { controller = "Account" }
+                );
+                routes.MapRoute(
+                    name: "admin",
+                    template: "Admin/{action=Index}",
+                    defaults: new { controller = "Admin" }
+                );
+                routes.MapRoute(
+                    name: "api",
+                    template: "API/{action=Index}",
+                    defaults: new { controller = "API" }
+                );
+
+                routes.MapRoute(
+                    name: "editor",
+                    template: "API/Editor/{action=Index}",
+                    defaults: new { controller = "Editor" }
+                );
+                routes.MapRoute(
+                    name: "setup",
+                    template: "Admin/Setup/{action=Index}",
+                    defaults: new { controller = "Setup" }
+                );
+
+                routes.MapRoute(
+                    name: "file",
+                    template: "File/{articleGuid}/{uploadedFileGuid}",
+                    defaults: new { controller = "File", action = "Get" }
+                );
+                routes.MapRoute(
+                    name: "login",
+                    template: "Account/Login",
+                    defaults: new { controller = "Auth", action = "Index" }
+                );
+                routes.MapRoute(
+                    name: "login_postback",
+                    template: "Account/Login/PostBack",
+                    defaults: new { controller = "Auth", action = "Login_PostBack" }
+                );
+                routes.MapRoute(
+                    name: "logout",
+                    template: "Account/Logout",
+                    defaults: new { controller = "Auth", action = "Logout" }
+                );
             });
 
             app.UseTemplateParsing(); //博客模板解析中间件

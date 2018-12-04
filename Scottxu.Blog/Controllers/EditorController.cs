@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Scottxu.Blog.Models;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -15,7 +16,7 @@ namespace Scottxu.Blog.Controllers
     public class EditorController : BaseController
     {
         IHostingEnvironment HostingEnvironment { get; }
-        public EditorController(BlogSystemContext context, IHostingEnvironment hostingEnvironment) : base(context) => HostingEnvironment = hostingEnvironment;
+        public EditorController(BlogSystemContext context, IOptions<SiteOptions> options, IHostingEnvironment hostingEnvironment) : base(context, options) => HostingEnvironment = hostingEnvironment;
 
         // GET: /Editor/Config
         [HttpGet]
