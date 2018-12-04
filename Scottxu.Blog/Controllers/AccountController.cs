@@ -11,10 +11,10 @@ using Scottxu.Blog.Models.Util;
 
 namespace Scottxu.Blog.Controllers
 {
-    public class AccountController : BaseController
+    public class AuthController : BaseController
     {
         Captcha.ICaptcha Captcha { get; }
-        public AccountController(BlogSystemContext context, IOptions<SiteOptions> options, Captcha.ICaptcha captcha) :
+        public AuthController(BlogSystemContext context, IOptions<SiteOptions> options, Captcha.ICaptcha captcha) :
             base(context, options) => Captcha = captcha;
 
         // GET: /Auth
