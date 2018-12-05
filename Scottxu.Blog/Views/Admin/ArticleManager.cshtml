@@ -3,20 +3,18 @@
     ViewBag.PageName = "article";
 }
 @model Scottxu.Blog.Models.ViewModel.Admin.ArticleManagerViewModel
+
 @section Head {
     <style>
-        .edui-editor.edui-default {
-            z-index: 999 !important;
-        }
+        .edui-editor.edui-default { z-index: 999 !important; }
 
-        .edui-editor-iframeholder.edui-default {
-            z-index: 999 !important;
-        }
+        .edui-editor-iframeholder.edui-default { z-index: 999 !important; }
     </style>
     <script blog-src="ueditor/ueditor.config.js"></script>
     <script blog-src="ueditor/ueditor.all.min.js"></script>
     <script blog-src="assets/admin/js/articlemanager.js"></script>
 }
+
 <div class="tpl-portlet-components">
     <div class="portlet-title">
         <div class="caption font-green bold">
@@ -37,26 +35,26 @@
                 <div class="am-u-sm-12 am-u-md-3">
                     <div class="am-form-group">
                         <select data-am-selected="{btnSize: 'sm', maxHeight: 130}" id="articleType_select" name="articleTypeGuid">
-                            @{ 
-                                if (Model.ArticleType == null) { 
+                            @{
+                                if (Model.ArticleType == null)
+                                {
                                     <option value="0" selected="selected">所有类别</option>
                                 }
                                 else
                                 {
                                     <option value="0">所有类别</option>
-
                                 }
                             }
                             @foreach (var articleType in Model.SelectedArticleTypes)
                             {
-                                if (Model.ArticleType == articleType) { 
+                                if (Model.ArticleType == articleType)
+                                {
                                     <option value="@articleType.Guid" selected="selected">@(articleType.Name)</option>
                                 }
                                 else
                                 {
                                     <option value="@articleType.Guid">@(articleType.Name)</option>
                                 }
-
                             }
                         </select>
                     </div>
@@ -121,15 +119,17 @@
     </div>
     <hr>
 </div>
-<div class="am-popup" id="add_item" style="height:100%;width:100%;left:0;top:0;margin:0;">
+<div class="am-popup" id="add_item" style="height: 100%; width: 100%; left: 0; top: 0; margin: 0;">
     <div class="am-popup-inner">
         <div class="am-popup-hd">
             <h4 class="am-popup-title">新增</h4>
             <span data-am-modal-close
-                  class="am-close"><span class="am-icon-times"></span></span>
+                  class="am-close">
+                <span class="am-icon-times"></span>
+            </span>
         </div>
-        <div class="am-popup-bd" style="height:100%;width:100%;">
-            <form class="am-form" style="text-align:left;" id="add_item_form" blog-admin-action="ArticleManager_AddItem" method="post">
+        <div class="am-popup-bd" style="height: 100%; width: 100%;">
+            <form class="am-form" style="text-align: left;" id="add_item_form" blog-admin-action="ArticleManager_AddItem" method="post">
                 <div class="am-form-group">
                     <label for="add_item_name">标题</label>
                     <input type="text" id="add_item_name" name="name" placeholder="输入标题" required/>
@@ -140,7 +140,7 @@
                         <option value=""></option>
                         @foreach (var articleType in Model.SelectedArticleTypes)
                         {
-                        <option value="@articleType.Guid">@(articleType.Name)</option>
+                            <option value="@articleType.Guid">@(articleType.Name)</option>
                         }
                     </select>
                 </div>
@@ -150,7 +150,7 @@
                         <option value=""></option>
                         @foreach (var articleLabel in Model.SelectedArticleLabels)
                         {
-                        <option value="@articleLabel.Guid">@(articleLabel.Name)</option>
+                            <option value="@articleLabel.Guid">@(articleLabel.Name)</option>
                         }
                     </select>
                 </div>
@@ -158,25 +158,27 @@
                     <label for="add_item_container">正文</label>
                     <script id="add_item_container" name="content" type="text/plain"></script>
                 </div>
-                <hr />
+                <hr/>
                 <div style="text-align: right;">
                     <button type="submit" class="am-btn am-btn-success"><span class="am-icon-plus"></span> 新增</button>
                     <button type="reset" class="am-btn" data-am-modal-close><span class="am-icon-times"></span> 取消</button>
                 </div>
             </form>
-            <br />
+            <br/>
         </div>
     </div>
 </div>
-<div class="am-popup" id="edit_item" style="height:100%;width:100%;left:0;top:0;margin:0;">
+<div class="am-popup" id="edit_item" style="height: 100%; width: 100%; left: 0; top: 0; margin: 0;">
     <div class="am-popup-inner">
         <div class="am-popup-hd">
             <h4 class="am-popup-title">编辑</h4>
             <span data-am-modal-close
-                  class="am-close"><span class="am-icon-times"></span></span>
+                  class="am-close">
+                <span class="am-icon-times"></span>
+            </span>
         </div>
-        <div class="am-popup-bd" style="height:100%;width:100%;">
-            <form class="am-form" style="text-align:left;" id="edit_item_form" blog-admin-action="ArticleManager_EditItem" method="post">
+        <div class="am-popup-bd" style="height: 100%; width: 100%;">
+            <form class="am-form" style="text-align: left;" id="edit_item_form" blog-admin-action="ArticleManager_EditItem" method="post">
                 <input type="hidden" name="guid" id="edit_item_guid">
                 <div class="am-form-group">
                     <label for="edit_item_name">标题</label>
@@ -187,7 +189,7 @@
                     <select id="edit_item_type" name="articleTypeGuid" placeholder="选择类别" data-am-selected="{searchBox: 1, btnWidth: '100%'}" required>
                         @foreach (var articleType in Model.SelectedArticleTypes)
                         {
-                        <option value="@articleType.Guid">@(articleType.Name)</option>
+                            <option value="@articleType.Guid">@(articleType.Name)</option>
                         }
                     </select>
                 </div>
@@ -197,7 +199,7 @@
                         <option value=""></option>
                         @foreach (var articleLabel in Model.SelectedArticleLabels)
                         {
-                        <option value="@articleLabel.Guid">@(articleLabel.Name)</option>
+                            <option value="@articleLabel.Guid">@(articleLabel.Name)</option>
                         }
                     </select>
                 </div>
@@ -205,13 +207,13 @@
                     <label for="edit_item_container">正文</label>
                     <script id="edit_item_container" name="content" type="text/plain"></script>
                 </div>
-                <hr />
+                <hr/>
                 <div style="text-align: right;">
                     <button type="submit" class="am-btn am-btn-success"><span class="am-icon-pencil-square-o"></span> 修改</button>
                     <button type="reset" class="am-btn" data-am-modal-close><span class="am-icon-times"></span> 取消</button>
                 </div>
             </form>
-            <br />
+            <br/>
         </div>
     </div>
 </div>

@@ -6,13 +6,14 @@ using Scottxu.Blog.Models;
 using Scottxu.Blog.Models.ViewModel.Admin;
 using Scottxu.Blog.Models.ViewModel;
 using Scottxu.Blog.Models.Entitys;
-using Scottxu.Blog.Models.Helper;
+using Scottxu.Blog.Models.Helpers;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
 using System;
 using Scottxu.Blog.Models.Exception;
 using Microsoft.Extensions.Options;
+using Scottxu.Blog.Models.Units;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,16 +23,19 @@ namespace Scottxu.Blog.Controllers
     public class AdminController : BaseController
     {
         IHostingEnvironment HostingEnvironment { get; }
-        Captcha.ICaptcha Captcha { get; }
-        public AdminController(BlogSystemContext context, IOptions<SiteOptions> options, IHostingEnvironment hostingEnvironment) : 
+
+        public AdminController(BlogSystemContext context, IOptions<SiteOptions> options,
+            IHostingEnvironment hostingEnvironment) :
             base(context, options) => HostingEnvironment = hostingEnvironment;
 
         #region 概览
+
         // GET: /Admin/
         public IActionResult Index()
         {
             var indexViewModel = new IndexViewModel();
-            switch(OSPlatform) {
+            switch (OSPlatform)
+            {
                 case OSPlatformEnum.Linux:
                     indexViewModel.OSType = "Linux";
                     indexViewModel.OSIcon = "linux";
@@ -49,14 +53,18 @@ namespace Scottxu.Blog.Controllers
                     indexViewModel.OSIcon = "question-circle";
                     break;
             }
+
             indexViewModel.Version = $"V{AssemblyVersion.Major}.{AssemblyVersion.Minor}.{AssemblyVersion.Build}";
             return View(indexViewModel);
         }
+
         #endregion
 
         #region 文章管理
+
         // GET: /Admin/ArticleManager
-        public IActionResult ArticleManager(string searchMessage, Guid? articleTypeGuid, int page = 0){
+        public IActionResult ArticleManager(string searchMessage, Guid? articleTypeGuid, int page = 0)
+        {
             return View(ArticleManager_LoadData(page, searchMessage, articleTypeGuid));
         }
 
@@ -84,8 +92,9 @@ namespace Scottxu.Blog.Controllers
         [ApiAction]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public void ArticleManager_Delete(Guid[] deleteGuid) {
-            if (deleteGuid == null || !deleteGuid.Any()) 
+        public void ArticleManager_Delete(Guid[] deleteGuid)
+        {
+            if (deleteGuid == null || !deleteGuid.Any())
                 throw new MissingParametersException("缺少参数。");
             Article.Delete(DataBaseContext, HostingEnvironment, deleteGuid);
             DataBaseContext.SaveChanges();
@@ -110,7 +119,8 @@ namespace Scottxu.Blog.Controllers
         {
             var article = Article.GetArticle(DataBaseContext, guid);
             var articleLabel = ArticleLabel.GetAllDataByArticle(DataBaseContext, article);
-            return new {
+            return new
+            {
                 article.Name,
                 article.Content,
                 ArticleTypeGuid = article.ArticleType.Guid,
@@ -122,16 +132,19 @@ namespace Scottxu.Blog.Controllers
         [ApiAction]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public void ArticleManager_EditItem(Guid guid, string name, Guid articleTypeGuid, Guid[] articleLabelGuids, string content)
+        public void ArticleManager_EditItem(Guid guid, string name, Guid articleTypeGuid, Guid[] articleLabelGuids,
+            string content)
         {
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(content))
                 throw new MissingParametersException("缺少参数。");
             Article.EditItem(DataBaseContext, guid, name, articleTypeGuid, articleLabelGuids, content);
             DataBaseContext.SaveChanges();
         }
+
         #endregion
 
         #region 类别管理
+
         // GET: /Admin/TypeManager
         public IActionResult TypeManager(string searchMessage, int page = 0)
         {
@@ -145,10 +158,9 @@ namespace Scottxu.Blog.Controllers
                 PageSize = 10,
                 PageIndex = page
             };
-            List<ArticleType> articleTypes;
             return new TypeManagerViewModel()
             {
-                ArticleTypes = ArticleType.GetData(DataBaseContext, pageInfo, searchMessage, out articleTypes),
+                ArticleTypes = ArticleType.GetData(DataBaseContext, pageInfo, searchMessage, out var articleTypes),
                 PageInfo = pageInfo,
                 SearchMessage = searchMessage,
                 SelectedArticleTypes = articleTypes
@@ -161,7 +173,7 @@ namespace Scottxu.Blog.Controllers
         [ValidateAntiForgeryToken]
         public void TypeManager_Delete(Guid[] deleteGuid)
         {
-            if (deleteGuid == null || deleteGuid.Count() == 0)
+            if (deleteGuid == null || !deleteGuid.Any())
                 throw new MissingParametersException("缺少参数。");
             ArticleType.Delete(DataBaseContext, deleteGuid);
             DataBaseContext.SaveChanges();
@@ -190,9 +202,11 @@ namespace Scottxu.Blog.Controllers
             ArticleType.EditItem(DataBaseContext, guid, name, parentArticleTypeGuid, sequence);
             DataBaseContext.SaveChanges();
         }
+
         #endregion
 
         #region 标签管理
+
         // GET: /Admin/LabelManager
         public IActionResult LabelManager(string searchMessage, int page = 0)
         {
@@ -222,7 +236,7 @@ namespace Scottxu.Blog.Controllers
         [ValidateAntiForgeryToken]
         public void LabelManager_Delete(Guid[] deleteGuid)
         {
-            if (deleteGuid == null || deleteGuid.Count() == 0)
+            if (deleteGuid == null || !deleteGuid.Any())
                 throw new MissingParametersException("缺少参数。");
             ArticleLabel.Delete(DataBaseContext, deleteGuid);
             DataBaseContext.SaveChanges();
@@ -251,16 +265,19 @@ namespace Scottxu.Blog.Controllers
             ArticleLabel.EditItem(DataBaseContext, guid, name);
             DataBaseContext.SaveChanges();
         }
+
         #endregion
 
         #region 模板管理
+
         // GET: /Admin/TemplateManager
         public IActionResult TemplateManager(string searchMessage, int page = 0)
         {
             return View(TemplateManager_LoadData(page, searchMessage));
         }
 
-        TemplateManagerViewModel TemplateManager_LoadData(int page, string searchMessage) {
+        TemplateManagerViewModel TemplateManager_LoadData(int page, string searchMessage)
+        {
             var pageInfo = new PageInfoViewModel
             {
                 PageSize = 10,
@@ -280,8 +297,9 @@ namespace Scottxu.Blog.Controllers
         [ApiAction]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public void TemplateManager_Delete(Guid[] deleteGuid) {
-            if (deleteGuid == null || deleteGuid.Count() == 0) 
+        public void TemplateManager_Delete(Guid[] deleteGuid)
+        {
+            if (deleteGuid == null || !deleteGuid.Any())
                 throw new MissingParametersException("缺少参数。");
             TemplateFile.Delete(DataBaseContext, HostingEnvironment, deleteGuid);
             DataBaseContext.SaveChanges();
@@ -295,8 +313,9 @@ namespace Scottxu.Blog.Controllers
         {
             if (string.IsNullOrEmpty(virtualPath) || Request.Form.Files.Count() != 1)
                 throw new MissingParametersException("缺少参数。");
-            TemplateFile.AddItem(DataBaseContext, HostingEnvironment, virtualPath, 
-                                 (dataBaseContext, hostingEnvironment) => new UploadHelper(dataBaseContext, hostingEnvironment).SaveFiles(HttpContext));
+            TemplateFile.AddItem(DataBaseContext, HostingEnvironment, virtualPath,
+                (dataBaseContext, hostingEnvironment) =>
+                    new UploadUnit(dataBaseContext, hostingEnvironment).SaveFiles(HttpContext));
             DataBaseContext.SaveChanges();
         }
 
@@ -320,28 +339,30 @@ namespace Scottxu.Blog.Controllers
         {
             if (Request.Form.Files.Count() != 1)
                 throw new MissingParametersException("缺少参数。");
-            var uploadHelper = new UploadHelper(DataBaseContext, HostingEnvironment);
             using (var transaction = DataBaseContext.Database.BeginTransaction())
             {
                 TemplateFile.DeleteAll(DataBaseContext, HostingEnvironment);
                 DataBaseContext.SaveChanges();
 
                 TemplateFile.AddZipFile(DataBaseContext, HostingEnvironment,
-                                        (dataBaseContext, hostingEnvironment) => new UploadHelper(dataBaseContext, hostingEnvironment).SaveZipFiles(HttpContext));
+                    (dataBaseContext, hostingEnvironment) =>
+                        new UploadUnit(dataBaseContext, hostingEnvironment).SaveZipFiles(HttpContext));
                 DataBaseContext.SaveChanges();
                 transaction.Commit();
             }
         }
 
-        public override void OnActionExecuting(ActionExecutingContext context) {
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
             base.OnActionExecuting(context);
             if (context.Result != null) return;
-            ConfigHelper configHelper = new ConfigHelper(DataBaseContext);
-            ViewBag.userName = configHelper.UserName;
+            var configUnit = new ConfigUnit(DataBaseContext);
+            ViewBag.userName = configUnit.UserName;
             ViewBag.articlesCount = DataBaseContext.Articles.Count();
             ViewBag.articleTypesCount = DataBaseContext.ArticleTypes.Count();
             ViewBag.articleLabelsCount = DataBaseContext.ArticleLabels.Count();
         }
+
         #endregion
     }
 }

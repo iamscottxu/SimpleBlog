@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace Scottxu.Blog.Models.ViewModel.Admin
 {
     public class IndexViewModel

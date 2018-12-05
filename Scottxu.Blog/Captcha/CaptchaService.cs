@@ -8,12 +8,12 @@ namespace Scottxu.Blog.Captcha
     {
         public static IServiceCollection AddCaptcha<T>(this IServiceCollection collection) where T : class, ICaptcha
         {
-
             return collection.AddSingleton<ICaptcha, T>();
         }
 
-        public static IServiceCollection AddCaptcha<T, U>(this IServiceCollection collection, IConfiguration configuration) 
-            where T : class, ICaptcha 
+        public static IServiceCollection AddCaptcha<T, U>(this IServiceCollection collection,
+            IConfiguration configuration)
+            where T : class, ICaptcha
             where U : class, ICaptchaOptions
         {
             return AddCaptcha<T>(collection.Configure<U>(configuration.GetSection("CaptchaOptions")));

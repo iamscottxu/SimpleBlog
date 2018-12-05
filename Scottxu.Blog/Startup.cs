@@ -29,11 +29,12 @@ namespace Scottxu.Blog
         /// <param name="services">Services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            var appSettings = new Models.Util.AppSettingsUtil(Configuration);
+            var appSettings = new Models.Units.AppSettingsUnit(Configuration);
 
             services.AddDbContext<BlogSystemContext>(appSettings.GetDbContextOptionsBuilder());
 
-            services.AddAuthentication(options => {
+            services.AddAuthentication(options =>
+            {
                 options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -89,70 +90,70 @@ namespace Scottxu.Blog
             app.UseAuthentication();
 
             //app.UseSession();
-            
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "home",
                     template: "{action=Index}",
-                    defaults: new { controller = "Home" }
+                    defaults: new {controller = "Home"}
                 );
                 routes.MapRoute(
                     name: "goAccount_admin",
                     template: "Admin/GoAccount/{accountAction}",
-                    defaults: new { controller = "Home", action = "GoAccount" }
+                    defaults: new {controller = "Home", action = "GoAccount"}
                 );
                 routes.MapRoute(
                     name: "goAccount_account",
                     template: "Account/GoAccount/{accountAction}",
-                    defaults: new { controller = "Home", action = "GoAccount" }
+                    defaults: new {controller = "Home", action = "GoAccount"}
                 );
                 routes.MapRoute(
                     name: "account",
                     template: "Account/{action=Index}",
-                    defaults: new { controller = "Account" }
+                    defaults: new {controller = "Account"}
                 );
                 routes.MapRoute(
                     name: "admin",
                     template: "Admin/{action=Index}",
-                    defaults: new { controller = "Admin" }
+                    defaults: new {controller = "Admin"}
                 );
                 routes.MapRoute(
                     name: "api",
                     template: "API/{action=Index}",
-                    defaults: new { controller = "API" }
+                    defaults: new {controller = "API"}
                 );
 
                 routes.MapRoute(
                     name: "editor",
                     template: "API/Editor/{action=Index}",
-                    defaults: new { controller = "Editor" }
+                    defaults: new {controller = "Editor"}
                 );
                 routes.MapRoute(
                     name: "setup",
                     template: "Admin/Setup/{action=Index}",
-                    defaults: new { controller = "Setup" }
+                    defaults: new {controller = "Setup"}
                 );
 
                 routes.MapRoute(
                     name: "file",
                     template: "File/{articleGuid}/{uploadedFileGuid}",
-                    defaults: new { controller = "File", action = "Get" }
+                    defaults: new {controller = "File", action = "Get"}
                 );
                 routes.MapRoute(
                     name: "login",
                     template: "Account/Login",
-                    defaults: new { controller = "Auth", action = "Index" }
+                    defaults: new {controller = "Auth", action = "Index"}
                 );
                 routes.MapRoute(
                     name: "login_postback",
                     template: "Account/Login/PostBack",
-                    defaults: new { controller = "Auth", action = "Login_PostBack" }
+                    defaults: new {controller = "Auth", action = "Login_PostBack"}
                 );
                 routes.MapRoute(
                     name: "logout",
                     template: "Account/Logout",
-                    defaults: new { controller = "Auth", action = "Logout" }
+                    defaults: new {controller = "Auth", action = "Logout"}
                 );
             });
 

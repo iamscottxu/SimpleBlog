@@ -12,15 +12,14 @@ namespace Scottxu.Blog.TagHelpers
     {
         public string BlogSrc { get; set; }
 
-        [ViewContext]
-        [HtmlAttributeNotBound]
-        public ViewContext ViewContext { get; set; }
+        [ViewContext] [HtmlAttributeNotBound] public ViewContext ViewContext { get; set; }
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            var options = (IOptions<SiteOptions>)ViewContext.ViewData["SiteOptions"];
+            var options = (IOptions<SiteOptions>) ViewContext.ViewData["SiteOptions"];
             output.Attributes.RemoveAll("blog-src");
-            output.Attributes.SetAttribute("src", options.Value.GetCDNUrl(BlogSrc, ViewContext.HttpContext.Request.PathBase));
+            output.Attributes.SetAttribute("src",
+                options.Value.GetCDNUrl(BlogSrc, ViewContext.HttpContext.Request.PathBase));
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿$(function () {
-    let addUE = UE.getEditor('add_item_container', { initialFrameWidth: null, topOffset: 43, zIndex: 1120 });
-    let editUE = UE.getEditor('edit_item_container', { initialFrameWidth: null, topOffset: 43, zIndex: 1120 });
+    let addUE = UE.getEditor('add_item_container', {initialFrameWidth: null, topOffset: 43, zIndex: 1120});
+    let editUE = UE.getEditor('edit_item_container', {initialFrameWidth: null, topOffset: 43, zIndex: 1120});
     UE.Editor.prototype._bkGetActionUrl = UE.Editor.prototype.getActionUrl;
     UE.Editor.prototype.getActionUrl = function (action) {
-        switch (action){
+        switch (action) {
             case 'config':
                 return '../Editor/Config';
             case 'uploadimage':
@@ -40,7 +40,9 @@
                     complete: closeModalLoading,
                     dataType: 'json',
                     error: showNetError,
-                    success: data => jsonAjaxSuccess(data, function () { location.reload() })
+                    success: data => jsonAjaxSuccess(data, function () {
+                        location.reload()
+                    })
                 });
             }
         });

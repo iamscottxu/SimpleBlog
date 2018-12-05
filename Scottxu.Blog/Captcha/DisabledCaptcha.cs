@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
-using Scottxu.Blog.Models.Helper;
+using Scottxu.Blog.Models.Helpers;
 using System.Linq;
 
 namespace Scottxu.Blog.Captcha
@@ -12,7 +12,6 @@ namespace Scottxu.Blog.Captcha
     {
         public string GetHeadString(string action)
         {
-
             var stringBuilder = new StringBuilder();
             stringBuilder.AppendLine("<script>");
             stringBuilder.AppendLine("    getCaptchaText = function(loginFun, data) {");
@@ -29,7 +28,6 @@ namespace Scottxu.Blog.Captcha
 
         public DisabledCaptcha()
         {
-
         }
     }
 }

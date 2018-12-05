@@ -1,7 +1,7 @@
 ﻿function sendFormDataByAjax(form, beforeSend, complete, success, error) {
     $(form).validator({
-        submit: function() {
-            if(this.isFormValid()) {
+        submit: function () {
+            if (this.isFormValid()) {
                 $.ajax({
                     url: $(form).attr('action'),
                     data: new FormData(form),
@@ -16,7 +16,7 @@
                 });
             }
             return false;
-         }
+        }
     });
 }
 
@@ -44,21 +44,21 @@ function showNetError() {
 }
 
 function jsonAjaxSuccess(data, success) {
-    if(data.success) success(data.data);
+    if (data.success) success(data.data);
     else showError(data.message);
 }
 
 function replacePagination() {
-    let setLiHref = function(li, href) {
+    let setLiHref = function (li, href) {
         li.children('a').attr('href', href);
     };
-    let disabledLi = function(li) {
+    let disabledLi = function (li) {
         li.addClass('am-disabled');
     };
-    let archiveLi = function(li) {
+    let archiveLi = function (li) {
         li.addClass('am-active');
     };
-    $('pagination').each(function(index, value) {
+    $('pagination').each(function (index, value) {
         let pageIndex = $(value).attr('pageIndex');
         let pageCount = $(value).attr('pageCount');
         let parameters = $(value).attr('parameters');
@@ -67,7 +67,7 @@ function replacePagination() {
         let ul = $('<ul class="am-pagination tpl-pagination"></ul>');
         let liFirstPage = $('<li><a>«</a></li>');
         if (pageIndex == 0) disabledLi(liFirstPage);
-            else setLiHref(liFirstPage, '?page=0' + parameters);
+        else setLiHref(liFirstPage, '?page=0' + parameters);
         ul.append(liFirstPage);
         let pageStart = pageIndex - 2;
         let pageEnd = pageIndex + 2;
@@ -81,24 +81,24 @@ function replacePagination() {
         for (let i = 0; i < pageCount; i++) {
             let liPageIndex = $('<li><a>' + (i + 1) + '</a></li>');
             if (pageIndex == i) archiveLi(liPageIndex);
-                else setLiHref(liPageIndex, '?page=' + i + parameters);
+            else setLiHref(liPageIndex, '?page=' + i + parameters);
             ul.append(liPageIndex);
         }
         let liLastPage = $('<li><a>»</a></li>');
         if (pageIndex == pageCount - 1) disabledLi(liLastPage);
-            else setLiHref(liLastPage, '?page=' + (pageCount - 1) + parameters);
+        else setLiHref(liLastPage, '?page=' + (pageCount - 1) + parameters);
         ul.append(liLastPage);
         $(value).replaceWith(ul);
     });
 }
 
-function loadChosenSelect(){
+function loadChosenSelect() {
     $('.chosen-select').chosen({
         no_results_text: '未找到匹配的项！'
     });
 }
 
-$(function(){
+$(function () {
     replacePagination();
     loadChosenSelect();
 });

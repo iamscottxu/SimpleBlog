@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
-using Scottxu.Blog.Models.Helper;
+using Scottxu.Blog.Models.Helpers;
 using System.Linq;
 
 namespace Scottxu.Blog.Captcha
@@ -15,7 +15,8 @@ namespace Scottxu.Blog.Captcha
         public string GetHeadString(string action)
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine($"<script src='https://www.recaptcha.net/recaptcha/api.js?render={_options.SiteKey}'></script>");
+            stringBuilder.AppendLine(
+                $"<script src='https://www.recaptcha.net/recaptcha/api.js?render={_options.SiteKey}'></script>");
             stringBuilder.AppendLine("<script>");
             stringBuilder.AppendLine("    getCaptchaText = function(loginFun, data) {");
             stringBuilder.AppendLine("        grecaptcha.ready(function() {");
@@ -38,20 +39,20 @@ namespace Scottxu.Blog.Captcha
 
             try
             {
-
                 JObject jObject;
-                using (var response = HttpRequestHelper.CreatePostResponse("https://www.recaptcha.net/recaptcha/api/siteverify", new Dictionary<string, string>
+                using (var response = HttpRequestHelper.CreatePostResponse(
+                    "https://www.recaptcha.net/recaptcha/api/siteverify", new Dictionary<string, string>
                     {
-                        { "secret", _options.SecretKey },
-                        { "response", captcha },
-                        { "remoteip", ipAddress }
+                        {"secret", _options.SecretKey},
+                        {"response", captcha},
+                        {"remoteip", ipAddress}
                     }))
                 {
-                    jObject = (JObject)HttpRequestHelper.GetObjectFromJsonResponse(response);
+                    jObject = (JObject) HttpRequestHelper.GetObjectFromJsonResponse(response);
                 }
+
                 return jObject.GetValue("success").Value<bool>()
-                    ? jObject.GetValue("score").Value<double>() >= _options.AcceptScore ?
-                              null : "人机验证未通过，你可能是机器。"
+                    ? jObject.GetValue("score").Value<double>() >= _options.AcceptScore ? null : "人机验证未通过，你可能是机器。"
                     : "人机验证时发生错误：" + string.Join(",", jObject["error-codes"].ToList());
             }
             catch (Exception ex)

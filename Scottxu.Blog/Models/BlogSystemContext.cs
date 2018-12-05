@@ -28,6 +28,12 @@ namespace Scottxu.Blog.Models
         public DbSet<ArticleType> ArticleTypes { get; set; }
 
         /// <summary>
+        /// 获取或设置页面模板数据集。
+        /// </summary>
+        /// <value>页面模板数据集</value>
+        public DbSet<TemplateFile> Templates { get; set; }
+
+        /// <summary>
         /// 获取或设置页面模板文件数据集。
         /// </summary>
         /// <value>页面模板文件数据集</value>
@@ -59,12 +65,12 @@ namespace Scottxu.Blog.Models
 
         public BlogSystemContext(DbContextOptions<BlogSystemContext> options) : base(options)
         {
-
         }
 
         public bool DataBaseIsExist
         {
-            get {
+            get
+            {
                 try
                 {
                     Configs.Any();
@@ -81,75 +87,83 @@ namespace Scottxu.Blog.Models
         {
             //
             modelBuilder.Entity<ArticleType>()
-                        .HasMany(r => r.Articles)
-                        .WithOne(l => l.ArticleType)
-                        .HasForeignKey(f => f.ArticleTypeGuid)
-                        .IsRequired(true)
-                        .OnDelete(DeleteBehavior.Cascade);
-                        
+                .HasMany(r => r.Articles)
+                .WithOne(l => l.ArticleType)
+                .HasForeignKey(f => f.ArticleTypeGuid)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+
             //
             modelBuilder.Entity<ArticleLabelArticle>()
-                        .HasKey(k => new { k.ArticleLabelGuid, k.ArticleGuid });
+                .HasKey(k => new {k.ArticleGuid, k.ArticleLabelGuid});
 
             modelBuilder.Entity<ArticleLabelArticle>()
-                        .HasOne(r => r.Article)
-                        .WithMany(l => l.ArticleLabelArticles)
-                        .HasForeignKey(f => f.ArticleGuid)
-                        .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(r => r.Article)
+                .WithMany(l => l.ArticleLabelArticles)
+                .HasForeignKey(f => f.ArticleGuid)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ArticleLabelArticle>()
-                        .HasOne(r => r.ArticleLabel)
-                        .WithMany(l => l.ArticleLabelArticles)
-                        .HasForeignKey(f => f.ArticleLabelGuid)
-                        .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(r => r.ArticleLabel)
+                .WithMany(l => l.ArticleLabelArticles)
+                .HasForeignKey(f => f.ArticleLabelGuid)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ArticleLabelArticle>()
-                        .HasKey(k => new { k.ArticleGuid, k.ArticleLabelGuid });
+                .HasKey(k => new {k.ArticleGuid, k.ArticleLabelGuid});
 
             //
             modelBuilder.Entity<UploadedFileArticle>()
-                        .HasKey(k => new { k.UploadedFileGuid, k.ArticleGuid });
+                .HasKey(k => new {k.UploadedFileGuid, k.ArticleGuid});
 
             modelBuilder.Entity<UploadedFileArticle>()
-                        .HasOne(r => r.Article)
-                        .WithMany(l => l.UploadedFileArticles)
-                        .HasForeignKey(f => f.ArticleGuid)
-                        .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(r => r.Article)
+                .WithMany(l => l.UploadedFileArticles)
+                .HasForeignKey(f => f.ArticleGuid)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<UploadedFileArticle>()
-                        .HasOne(r => r.UploadedFile)
-                        .WithMany(l => l.UploadedFileArticles)
-                        .HasForeignKey(f => f.UploadedFileGuid)
-                        .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(r => r.UploadedFile)
+                .WithMany(l => l.UploadedFileArticles)
+                .HasForeignKey(f => f.UploadedFileGuid)
+                .OnDelete(DeleteBehavior.Cascade);
 
             //
             modelBuilder.Entity<UploadedFile>()
-                        .HasIndex(i => i.SHA1)
-                        .IsUnique(true);
+                .HasIndex(i => i.SHA1)
+                .IsUnique(true);
 
             modelBuilder.Entity<UploadedFile>()
-                        .HasIndex(i => i.FileName)
-                        .IsUnique(true);
+                .HasIndex(i => i.FileName)
+                .IsUnique(true);
 
             modelBuilder.Entity<UploadedFile>()
-                        .HasMany(r => r.TemplateFiles)
-                        .WithOne(l => l.UploadedFile)
-                        .IsRequired(true)
-                        .HasForeignKey(f => f.UploadedFileGuid)
-                        .OnDelete(DeleteBehavior.Cascade);
+                .HasMany(r => r.TemplateFiles)
+                .WithOne(l => l.UploadedFile)
+                .IsRequired(true)
+                .HasForeignKey(f => f.UploadedFileGuid)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //
+            modelBuilder.Entity<Template>()
+                .HasMany(r => r.TemplateFiles)
+                .WithOne(l => l.Template)
+                .IsRequired(true)
+                .HasForeignKey(f => f.TemplateGuid)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             //
             modelBuilder.Entity<TemplateFile>()
-                        .HasIndex(i => i.VirtualPath)
-                        .IsUnique(true);
+                .HasIndex(i => i.VirtualPath)
+                .IsUnique(true);
 
-            //
+
             modelBuilder.Entity<ArticleType>()
-                        .HasOne(l => l.ParentArticleType)
-                        .WithMany(r => r.ChildArticleTypes)
-                        .HasForeignKey(f => f.ParentArticleTypeGuid)
-                        .OnDelete(DeleteBehavior.Cascade);
-
+                .HasOne(l => l.ParentArticleType)
+                .WithMany(r => r.ChildArticleTypes)
+                .HasForeignKey(f => f.ParentArticleTypeGuid)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

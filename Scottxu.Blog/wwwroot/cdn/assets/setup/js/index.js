@@ -1,5 +1,4 @@
-﻿
-$(function () {
+﻿$(function () {
     $('#btn_Login').click(function () {
         let btn_Login = $('#btn_Login');
         let userName = $('#userName');
@@ -70,17 +69,21 @@ $(function () {
             return false;
         }
     });
+
     //获取参数值
     function getQueryString(name) {
         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
         var r = window.location.search.substr(1).match(reg);
-        if (r != null) return decodeURI(unescape(r[2])); return null;
+        if (r != null) return decodeURI(unescape(r[2]));
+        return null;
     }
+
     function showMessage(message) {
         let messagebox = $('#message');
         messagebox.css('display', 'inherit');
         messagebox.text(message);
     }
+
     function hideMessage() {
         let messagebox = $('#message');
         messagebox.css('display', 'none');

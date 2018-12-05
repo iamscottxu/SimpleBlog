@@ -7,12 +7,11 @@ namespace Scottxu.Blog.Captcha.ViewComponents
     [ViewComponent(Name = "CaptchaHead")]
     public class CaptchaHeadViewComponent : ViewComponent
     {
-
         ICaptcha Captcha { get; }
 
         public CaptchaHeadViewComponent(ICaptcha captcha) => Captcha = captcha;
 
-        public IViewComponentResult Invoke(string action) 
+        public IViewComponentResult Invoke(string action)
         {
             ViewContext.Writer.WriteLine(Captcha.GetHeadString(action));
             return Content(string.Empty);

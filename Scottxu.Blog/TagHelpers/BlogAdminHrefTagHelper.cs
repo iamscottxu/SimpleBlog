@@ -13,15 +13,14 @@ namespace Scottxu.Blog.TagHelpers
     {
         public string BlogAdminHref { get; set; }
 
-        [ViewContext]
-        [HtmlAttributeNotBound]
-        public ViewContext ViewContext { get; set; }
+        [ViewContext] [HtmlAttributeNotBound] public ViewContext ViewContext { get; set; }
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
-            var options = (IOptions<SiteOptions>)ViewContext.ViewData["SiteOptions"];
+            var options = (IOptions<SiteOptions>) ViewContext.ViewData["SiteOptions"];
             output.Attributes.RemoveAll("blog-admin-href");
-            output.Attributes.SetAttribute("href", options.Value.GetAdminUrl(BlogAdminHref, ViewContext.HttpContext.Request.PathBase));
+            output.Attributes.SetAttribute("href",
+                options.Value.GetAdminUrl(BlogAdminHref, ViewContext.HttpContext.Request.PathBase));
         }
     }
 }

@@ -16,7 +16,10 @@ namespace Scottxu.Blog.Controllers
     public class EditorController : BaseController
     {
         IHostingEnvironment HostingEnvironment { get; }
-        public EditorController(BlogSystemContext context, IOptions<SiteOptions> options, IHostingEnvironment hostingEnvironment) : base(context, options) => HostingEnvironment = hostingEnvironment;
+
+        public EditorController(BlogSystemContext context, IOptions<SiteOptions> options,
+            IHostingEnvironment hostingEnvironment)
+            : base(context, options) => HostingEnvironment = hostingEnvironment;
 
         // GET: /Editor/Config
         [HttpGet]
@@ -26,7 +29,8 @@ namespace Scottxu.Blog.Controllers
         }
 
         // POST: /Editor/UploadImage
-        public object UploadImage() {
+        public object UploadImage()
+        {
             return null;
         }
 

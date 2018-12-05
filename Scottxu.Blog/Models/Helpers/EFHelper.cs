@@ -5,7 +5,7 @@ using Scottxu.Blog.Models.Entitys;
 using Scottxu.Blog.Models.Units;
 using Scottxu.Blog.Models.ViewModel;
 
-namespace Scottxu.Blog.Models.Helper
+namespace Scottxu.Blog.Models.Helpers
 {
     public class EFHelper
     {

@@ -3,9 +3,11 @@
     ViewBag.PageName = "template";
 }
 @model Scottxu.Blog.Models.ViewModel.Admin.TemplateManagerViewModel
+
 @section Head {
     <script blog-src="assets/admin/js/templatemanager.js"></script>
 }
+
 <div class="tpl-portlet-components">
     <div class="portlet-title">
         <div class="caption font-green bold">
@@ -40,32 +42,36 @@
             <form blog-admin-action="TemplateManager_Delete" method="post" id="table_form">
                 <table class="am-table am-table-striped am-table-hover table-main">
                     <thead>
-                        <tr>
-                            <th class="table-check"></th>
-                            <th class="table-title am-hide-sm-only">名称</th>
-                            <th class="table-type am-hide-sm-only">MIME</th>
-                            <th class="table-author">虚拟路径</th>
-                            <th class="table-set" style="width:145px">操作</th>
-                        </tr>
+                    <tr>
+                        <th class="table-check"></th>
+                        <th class="table-title am-hide-sm-only">名称</th>
+                        <th class="table-type am-hide-sm-only">MIME</th>
+                        <th class="table-author">虚拟路径</th>
+                        <th class="table-set" style="width: 145px">操作</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        @foreach (var templateFile in Model.TemplateFiles)
-                        {
-                            <tr data-guid="@templateFile.Guid">
-                                <td><input type="checkbox" name="deleteGuid" value="@templateFile.Guid"></td>
-                                <td class="am-hide-sm-only"><a href="@templateFile.VirtualPath" target="_blank">@(templateFile.Name)</a></td>
-                                <td class="am-hide-sm-only">@(templateFile.MIME)</td>
-                                <td class="table-template-virtualpath">@(templateFile.VirtualPath)</td>
-                                <td>
-                                    <div class="am-btn-toolbar">
-                                        <div class="am-btn-group am-btn-group-xs">
-                                            <button type="button" class="am-btn am-btn-default am-btn-xs am-text-secondary edit-item" data-am-modal="{target: '#edit_item', closeViaDimmer: 0, width: 600, height: 200}"><span class="am-icon-pencil-square-o"></span> 编辑</button>
-                                            <button type="button" class="am-btn am-btn-default am-btn-xs am-text-danger delete-item"><span class="am-icon-trash-o"></span> 删除</button>
-                                        </div>
+                    @foreach (var templateFile in Model.TemplateFiles)
+                    {
+                        <tr data-guid="@templateFile.Guid">
+                            <td>
+                                <input type="checkbox" name="deleteGuid" value="@templateFile.Guid">
+                            </td>
+                            <td class="am-hide-sm-only">
+                                <a href="@templateFile.VirtualPath" target="_blank">@(templateFile.Name)</a>
+                            </td>
+                            <td class="am-hide-sm-only">@(templateFile.MIME)</td>
+                            <td class="table-template-virtualpath">@(templateFile.VirtualPath)</td>
+                            <td>
+                                <div class="am-btn-toolbar">
+                                    <div class="am-btn-group am-btn-group-xs">
+                                        <button type="button" class="am-btn am-btn-default am-btn-xs am-text-secondary edit-item" data-am-modal="{target: '#edit_item', closeViaDimmer: 0, width: 600, height: 200}"><span class="am-icon-pencil-square-o"></span> 编辑</button>
+                                        <button type="button" class="am-btn am-btn-default am-btn-xs am-text-danger delete-item"><span class="am-icon-trash-o"></span> 删除</button>
                                     </div>
-                                </td>
-                            </tr>
-                        }
+                                </div>
+                            </td>
+                        </tr>
+                    }
                     </tbody>
                 </table>
             </form>
@@ -83,10 +89,12 @@
     <div class="am-modal-dialog">
         <div class="am-modal-hd">
             新增
-            <a class="am-close am-close-spin" data-am-modal-close><span class="am-icon-times"></span></a>
+            <a class="am-close am-close-spin" data-am-modal-close>
+                <span class="am-icon-times"></span>
+            </a>
         </div>
         <div class="am-modal-bd">
-            <form class="am-form" style="text-align:left;" id="add_item_form" blog-admin-action="TemplateManager_AddItem" method="post">
+            <form class="am-form" style="text-align: left;" id="add_item_form" blog-admin-action="TemplateManager_AddItem" method="post">
                 <div class="am-form-group">
                     <label for="add_item_virtualpath">虚拟路径</label>
                     <input type="text" class="" id="add_item_virtualpath" name="virtualPath" placeholder="输入虚拟路径" required pattern='(^(\/[^\\\/:*?"<>\|]+)+$)|(^\/$)' maxlength="500">
@@ -100,8 +108,8 @@
                     </div>
                     <input type="file" id="add_item_file" name="file" required>
                 </div>
-                <hr />
-                <div style="text-align:right;">
+                <hr/>
+                <div style="text-align: right;">
                     <button type="submit" class="am-btn am-btn-success"><span class="am-icon-plus"></span> 新增</button>
                     <button type="reset" class="am-btn" data-am-modal-close><span class="am-icon-times"></span> 取消</button>
                 </div>
@@ -113,7 +121,9 @@
     <div class="am-modal-dialog">
         <div class="am-modal-hd">
             编辑
-            <a class="am-close am-close-spin" data-am-modal-close><span class="am-icon-times"></span></a>
+            <a class="am-close am-close-spin" data-am-modal-close>
+                <span class="am-icon-times"></span>
+            </a>
         </div>
         <div class="am-modal-bd">
             <form class="am-form" style="text-align: left;" id="edit_item_form" blog-admin-action="TemplateManager_EditItem" method="post">
@@ -122,8 +132,8 @@
                     <label for="edit_item_virtualpath">虚拟路径</label>
                     <input type="text" class="" id="edit_item_virtualpath" name="virtualPath" placeholder="输入虚拟路径" required pattern='(^(\/[^\\\/:*?"<>\|]+)+$)|(^\/$)' maxlength="500">
                 </div>
-                <hr />
-                <div style="text-align:right;">
+                <hr/>
+                <div style="text-align: right;">
                     <button type="submit" class="am-btn am-btn-success"><span class="am-icon-pencil-square-o"></span> 修改</button>
                     <button type="reset" class="am-btn" data-am-modal-close><span class="am-icon-times"></span> 取消</button>
                 </div>
@@ -135,10 +145,12 @@
     <div class="am-modal-dialog">
         <div class="am-modal-hd">
             上传压缩包
-            <a class="am-close am-close-spin" data-am-modal-close><span class="am-icon-times"></span></a>
+            <a class="am-close am-close-spin" data-am-modal-close>
+                <span class="am-icon-times"></span>
+            </a>
         </div>
         <div class="am-modal-bd">
-            <form class="am-form" style="text-align:left;" id="upload_zip_form" blog-admin-action="TemplateManager_UploadZip" method="post">
+            <form class="am-form" style="text-align: left;" id="upload_zip_form" blog-admin-action="TemplateManager_UploadZip" method="post">
                 <div class="am-alert am-alert-danger">
                     <p>警告：上传压缩包将会删除原有模板。</p>
                 </div>
@@ -151,8 +163,8 @@
                     </div>
                     <input type="file" id="upload_zip_file" name="file" required>
                 </div>
-                <hr />
-                <div style="text-align:right;">
+                <hr/>
+                <div style="text-align: right;">
                     <button type="submit" class="am-btn am-btn-success"><span class="am-icon-check"></span> 确定</button>
                     <button type="reset" class="am-btn" data-am-modal-close><span class="am-icon-times"></span> 取消</button>
                 </div>

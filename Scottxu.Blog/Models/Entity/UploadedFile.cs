@@ -10,25 +10,18 @@ namespace Scottxu.Blog.Models.Entitys
     public class UploadedFile : GuidEntity
     {
         /// <summary>
-        /// 获取或设置上传者的会话ID。
-        /// </summary>
-        /// <value>The session identifier.</value>
-        [MaxLength]
-        public String SessionId { get; set; }
-
-        /// <summary>
         /// 获取或设置SHA1值。
         /// </summary>
         /// <value>SHA1值</value>
         [Required, MaxLength]
-        public String SHA1 { get; set; }
+        public string SHA1 { get; set; }
 
         /// <summary>
         /// 获取或设置实际文件名。
         /// </summary>
         /// <value>实际文件名</value>
         [Required, StringLength(260)]
-        public String FileName { get; set; }
+        public string FileName { get; set; }
 
         /// <summary>
         /// 获取或设置上传文件文章的集合

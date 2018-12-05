@@ -1,31 +1,37 @@
 ﻿using System;
+
 namespace Scottxu.Blog.Models.ViewModel
 {
     public class PageInfoViewModel
     {
-        int recordCount;
-        int pageIndex;
+        int _recordCount;
+        int _pageIndex;
 
-        public int RecordCount { 
-            get => recordCount; 
-            set {
-                recordCount = value;
+        public int RecordCount
+        {
+            get => _recordCount;
+            set
+            {
+                _recordCount = value;
                 PageIndex = PageIndex > PageCount - 1 ? PageCount - 1 : PageIndex;
             }
         }
 
-        public int PageCount {
-            get {
+        public int PageCount
+        {
+            get
+            {
                 if (RecordCount == 0) return 1;
-                int pageCount = RecordCount / PageSize;
+                var pageCount = RecordCount / PageSize;
                 if (RecordCount % PageSize != 0) pageCount++;
                 return pageCount;
             }
         }
 
-        public int PageIndex { 
-            get => pageIndex; 
-            set => pageIndex = value > 0 ? value : 0;
+        public int PageIndex
+        {
+            get => _pageIndex;
+            set => _pageIndex = value > 0 ? value : 0;
         }
 
         public int PageSize { get; set; }

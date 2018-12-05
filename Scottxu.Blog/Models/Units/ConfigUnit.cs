@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Scottxu.Blog.Models.Entitys;
 
-namespace Scottxu.Blog.Models.Helper
+namespace Scottxu.Blog.Models.Units
 {
     /// <summary>
-    /// 配置帮助类
+    /// 配置管理类
     /// </summary>
-    public class ConfigHelper
+    public class ConfigUnit
     {
         #region fields & constructor
 
@@ -25,17 +24,17 @@ namespace Scottxu.Blog.Models.Helper
         #region methods
 
         /// <summary>
-        /// 初始化 <see cref="T:Scottxu.Blog.Models.Helper.ConfigHelper"/> 的实例。
+        /// 初始化 <see cref="T:Scottxu.Blog.Models.Units.ConfigHelper"/> 的实例。
         /// </summary>
         /// <param name="dataBaseContext">Data base context.</param>
-        public ConfigHelper(BlogSystemContext dataBaseContext)
+        public ConfigUnit(BlogSystemContext dataBaseContext)
         {
             Configs = dataBaseContext.Configs.ToList();
             this.dataBaseContext = dataBaseContext;
         }
 
         /// <summary>
-        /// 获取或设置 <see cref="T:Scottxu.Blog.Models.Helper.ConfigHelper"/> 的值
+        /// 获取或设置 <see cref="T:Scottxu.Blog.Models.Units.ConfigHelper"/> 的值
         /// </summary>
         /// <param name="key">键</param>
         public string this[string key]

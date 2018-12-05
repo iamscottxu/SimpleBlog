@@ -10,7 +10,8 @@ namespace Scottxu.Blog.Models.ViewModel.Home
 
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
-        public string EnglishDescribe {
+        public string EnglishDescribe
+        {
             get
             {
                 switch (ErrorCode)

@@ -2,6 +2,8 @@
 {
     class ParametersFormatErrorException : System.Exception
     {
-        public ParametersFormatErrorException(string message) : base(message) { }
+        public ParametersFormatErrorException(string message) : base(message)
+        {
+        }
     }
 }

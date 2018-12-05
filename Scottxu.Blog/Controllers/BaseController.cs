@@ -17,7 +17,7 @@ namespace Scottxu.Blog.Controllers
     public class BaseController : Controller
     {
         internal BlogSystemContext DataBaseContext { get; }
-        
+
         internal SiteOptions Options { get; }
 
         internal enum OSPlatformEnum
@@ -32,14 +32,17 @@ namespace Scottxu.Blog.Controllers
         {
             get
             {
-                if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux)) return OSPlatformEnum.Linux;
-                if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)) return OSPlatformEnum.Windows;
-                if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX)) return OSPlatformEnum.MacOS;
+                if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
+                    return OSPlatformEnum.Linux;
+                if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+                    return OSPlatformEnum.Windows;
+                if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
+                    return OSPlatformEnum.MacOS;
                 return OSPlatformEnum.Unknowed;
             }
         }
 
-        internal Version AssemblyVersion => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        internal static Version AssemblyVersion => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
 
         internal BaseController(BlogSystemContext context, IOptions<SiteOptions> options)
         {
@@ -55,7 +58,9 @@ namespace Scottxu.Blog.Controllers
             public object Data { get; set; }
         }
 
-        internal class ApiAction : Attribute { }
+        internal class ApiAction : Attribute
+        {
+        }
 
         internal async Task UserLoginAsync(string email)
         {
@@ -72,35 +77,35 @@ namespace Scottxu.Blog.Controllers
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            var controllerActionDescriptor = (ControllerActionDescriptor)context.ActionDescriptor;
+            var controllerActionDescriptor = (ControllerActionDescriptor) context.ActionDescriptor;
             if (controllerActionDescriptor.ControllerName != "Setup" && !DataBaseContext.DataBaseIsExist)
                 context.Result = RedirectToAction(String.Empty, "Setup");
         }
 
         public override void OnActionExecuted(ActionExecutedContext context)
         {
-            var controllerActionDescriptor = (ControllerActionDescriptor)context.ActionDescriptor;
+            var controllerActionDescriptor = (ControllerActionDescriptor) context.ActionDescriptor;
             var controllerActionMethodInfo = controllerActionDescriptor.MethodInfo;
             var apiActionAttributes = controllerActionMethodInfo.GetCustomAttributes(typeof(ApiAction), false);
-            if (apiActionAttributes.Any())
+            if (!apiActionAttributes.Any()) return;
+            if (context.Exception != null)
             {
-                if (context.Exception != null)
+                context.Result = Json(new JsonResult()
                 {
-                    context.Result = Json(new JsonResult()
-                    {
-                        Success = false,
-                        ErrorType = context.Exception.GetType().FullName,
-                        Message = context.Exception.Message
-                    });
-                    context.Exception = null;
-                }
-                else context.Result = Json(new JsonResult()
+                    Success = false,
+                    ErrorType = context.Exception.GetType().FullName,
+                    Message = context.Exception.Message
+                });
+                context.Exception = null;
+            }
+            else
+                context.Result = Json(new JsonResult()
                 {
                     Success = true,
-                    Data = context.Result.GetType() == typeof(ObjectResult) ? ((ObjectResult)context.Result).Value : null
+                    Data = context.Result.GetType() == typeof(ObjectResult)
+                        ? ((ObjectResult) context.Result).Value
+                        : null
                 });
-            }
         }
     }
 }
-

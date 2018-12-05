@@ -2,6 +2,8 @@
 {
     class MissingParametersException : System.Exception
     {
-        public MissingParametersException(string message) : base(message) { }
+        public MissingParametersException(string message) : base(message)
+        {
+        }
     }
 }

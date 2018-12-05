@@ -16,5 +16,4 @@ namespace Scottxu.Blog.TemplateParsingMiddleware
             return builder.UseMiddleware<TemplateParsing>();
         }
     }
-
 }

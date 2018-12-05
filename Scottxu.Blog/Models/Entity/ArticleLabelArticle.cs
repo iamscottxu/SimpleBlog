@@ -1,5 +1,6 @@
 ﻿using System;
 using Scottxu.Blog.Models.Entitys;
+
 namespace Scottxu.Blog.Models.Entitys
 {
     /// <summary>

@@ -5,7 +5,8 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Scottxu.Blog.Models.Exception;
-using Scottxu.Blog.Models.Helper;
+using Scottxu.Blog.Models.Helpers;
+using Scottxu.Blog.Models.Units;
 using Scottxu.Blog.Models.ViewModel;
 
 namespace Scottxu.Blog.Models.Entitys
@@ -20,7 +21,7 @@ namespace Scottxu.Blog.Models.Entitys
         /// </summary>
         /// <value>文章名</value>
         [Required, StringLength(50)]
-        public String Name { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// 获取或设置发布时间。
@@ -34,7 +35,7 @@ namespace Scottxu.Blog.Models.Entitys
         /// </summary>
         /// <value>内容</value>
         [MaxLength]
-        public String Content { get; set; }
+        public string Content { get; set; }
 
         /// <summary>
         /// 获取或设置点击次数。
@@ -42,7 +43,7 @@ namespace Scottxu.Blog.Models.Entitys
         /// <value>点击次数</value>
         [Required]
         [ConcurrencyCheck]
-        public UInt64 ClickTraffic { get; set; }
+        public ulong ClickTraffic { get; set; }
 
         /// <summary>
         /// 获取或设置文章类型。
@@ -51,8 +52,7 @@ namespace Scottxu.Blog.Models.Entitys
         [Required]
         public virtual ArticleType ArticleType { get; set; }
 
-        [Required]
-        public Guid ArticleTypeGuid { get; set; }
+        [Required] public Guid ArticleTypeGuid { get; set; }
 
         /// <summary>
         /// 获取或设置文章标签文章的集合。
@@ -69,12 +69,15 @@ namespace Scottxu.Blog.Models.Entitys
         /// <summary>
         /// 初始化类 <see cref="T:Scottxu.Blog.Models.Article"/> 的一个新的实例。
         /// </summary>
-        public Article() {
+        public Article()
+        {
             ClickTraffic = 0;
             PublishDate = DateTime.UtcNow;
         }
 
-        public static List<Article> GetData(BlogSystemContext dataBaseContext, PageInfoViewModel pageInfo, string searchMessage, Guid? articleTypeGuid = null, Guid? articleLabelGuid = null, bool getArticleType = true, bool getArticleLabels = true, bool getText = true)
+        public static List<Article> GetData(BlogSystemContext dataBaseContext, PageInfoViewModel pageInfo,
+            string searchMessage, Guid? articleTypeGuid = null, Guid? articleLabelGuid = null,
+            bool getArticleType = true, bool getArticleLabels = true, bool getText = true)
         {
             var efHelper = new EFHelper(dataBaseContext);
 
@@ -98,7 +101,7 @@ namespace Scottxu.Blog.Models.Entitys
             }
 
             // 表单搜索
-            string searchText = searchMessage?.Trim();
+            var searchText = searchMessage?.Trim();
             if (!string.IsNullOrEmpty(searchText))
             {
                 q = q.Where(o => o.Name.Contains(searchText));
@@ -120,24 +123,29 @@ namespace Scottxu.Blog.Models.Entitys
             return articles;
         }
 
-        public static void Delete(BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment, Guid[] deleteGuid)
+        public static void Delete(BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment,
+            IEnumerable<Guid> deleteGuid)
         {
-            var uploadHelper = new UploadHelper(dataBaseContext, hostingEnvironment);
+            var uploadUnit = new UploadUnit(dataBaseContext, hostingEnvironment);
             deleteGuid.ToList().ForEach(d =>
             {
                 var article = dataBaseContext.Articles.FirstOrDefault(q => q.Guid == d);
-                var uploadedFileArticles = dataBaseContext.UploadedFileArticles.Where(q => q.Article == article).ToList();
-                uploadedFileArticles.ForEach(q => {
+                var uploadedFileArticles =
+                    dataBaseContext.UploadedFileArticles.Where(q => q.Article == article).ToList();
+                uploadedFileArticles.ForEach(q =>
+                {
                     dataBaseContext.UploadedFileArticles.Remove(q);
-                    uploadHelper.CheckAndDeleteFile(q.UploadedFileGuid);
+                    uploadUnit.CheckAndDeleteFile(q.UploadedFileGuid);
                 });
                 dataBaseContext.Articles.Remove(article);
             });
         }
 
-        public static void AddItem(BlogSystemContext dataBaseContext, string name, Guid articleTypeGuid, Guid[] articleLabelGuids, string content)
+        public static void AddItem(BlogSystemContext dataBaseContext, string name, Guid articleTypeGuid,
+            Guid[] articleLabelGuids, string content)
         {
-            FormatVerificationHelper.FormatVerification(name, FormatVerificationHelper.FormatType.ArticleName, new ParametersFormatErrorException("文章名格式错误。"));
+            FormatVerificationHelper.FormatVerification(name, FormatVerificationHelper.FormatType.ArticleName,
+                new ParametersFormatErrorException("文章名格式错误。"));
             var article = new Article()
             {
                 Name = name,
@@ -152,14 +160,18 @@ namespace Scottxu.Blog.Models.Entitys
             }));
         }
 
-        public static void EditItem(BlogSystemContext dataBaseContext, Guid guid, string name, Guid articleTypeGuid, Guid[] articleLabelGuids, string content)
+        public static void EditItem(BlogSystemContext dataBaseContext, Guid guid, string name, Guid articleTypeGuid,
+            IEnumerable<Guid> articleLabelGuids, string content)
         {
-            FormatVerificationHelper.FormatVerification(name, FormatVerificationHelper.FormatType.ArticleName, new ParametersFormatErrorException("文章名格式错误。"));
+            FormatVerificationHelper.FormatVerification(name, FormatVerificationHelper.FormatType.ArticleName,
+                new ParametersFormatErrorException("文章名格式错误。"));
             var article = dataBaseContext.Articles.FirstOrDefault(q => q.Guid == guid);
+            if (article == null) return;
             article.Name = name;
             article.ArticleTypeGuid = articleTypeGuid;
             article.Content = content;
-            dataBaseContext.ArticleLabelArticles.RemoveRange(dataBaseContext.ArticleLabelArticles.Where(o => o.Article == article));
+            dataBaseContext.ArticleLabelArticles.RemoveRange(
+                dataBaseContext.ArticleLabelArticles.Where(o => o.Article == article));
             dataBaseContext.ArticleLabelArticles.AddRange(articleLabelGuids.Select(o => new ArticleLabelArticle
             {
                 ArticleLabelGuid = o,
@@ -170,7 +182,9 @@ namespace Scottxu.Blog.Models.Entitys
         public static Article GetArticle(BlogSystemContext dataBaseContext, Guid guid, bool addUpClickTraffic = false)
         {
             var article = dataBaseContext.Articles.Include(o => o.ArticleType).FirstOrDefault(o => o.Guid == guid);
-            if (addUpClickTraffic) article.ClickTraffic++;
+            if (!addUpClickTraffic) return article;
+            if (article != null)
+                article.ClickTraffic++;
             return article;
         }
     }

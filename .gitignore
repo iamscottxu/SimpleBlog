@@ -17,6 +17,9 @@ TestResults/
 # vscode
 .vscode/
 
+# idea
+.idea/
+
 # appsettings
 /Scottxu.Blog/appsettings.json
 

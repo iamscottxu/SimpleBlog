@@ -1,8 +1,8 @@
-﻿$(function(){
-    $('.delete-item').click(function(){
+﻿$(function () {
+    $('.delete-item').click(function () {
         $('#delete_item_confirm').modal({
             relatedTarget: this,
-            onConfirm: function(options) {
+            onConfirm: function (options) {
                 var relatedTarget = $(this.relatedTarget);
                 var form = relatedTarget.parents('form');
                 $.ajax({
@@ -16,21 +16,23 @@
                     complete: closeModalLoading,
                     dataType: 'json',
                     error: showNetError,
-                    success: data => jsonAjaxSuccess(data, function(){location.reload()})
+                    success: data => jsonAjaxSuccess(data, function () {
+                        location.reload()
+                    })
                 });
             }
         });
     });
 
-    $('.edit-item').click(function(){
+    $('.edit-item').click(function () {
         $('#edit_item_guid').val($(this).parents('tr').data('guid'));
         $('#edit_item_name').val($(this).parents('tr').find('.table-articleLabel-name').text());
     });
 
-    $('#delete_select').click(function(){
+    $('#delete_select').click(function () {
         $('#delete_select_confirm').modal({
             relatedTarget: this,
-            onConfirm: function(options) {
+            onConfirm: function (options) {
                 var table_form = $('#table_form');
                 if (table_form.find('[name="deleteGuid"]:checked').length > 0)
                     table_form.submit();
@@ -39,24 +41,24 @@
     });
 
     sendFormDataByAjax(
-        $('#add_item_form')[0], 
-        openModalLoading, 
+        $('#add_item_form')[0],
+        openModalLoading,
         closeModalLoading,
         data => jsonAjaxSuccess(data, reLoadPage),
         showNetError
     );
 
     sendFormDataByAjax(
-        $('#edit_item_form')[0], 
-        openModalLoading, 
+        $('#edit_item_form')[0],
+        openModalLoading,
         closeModalLoading,
         data => jsonAjaxSuccess(data, reLoadPage),
         showNetError
     );
 
     sendFormDataByAjax(
-        $('#table_form')[0], 
-        openModalLoading, 
+        $('#table_form')[0],
+        openModalLoading,
         closeModalLoading,
         data => jsonAjaxSuccess(data, reLoadPage),
         showNetError

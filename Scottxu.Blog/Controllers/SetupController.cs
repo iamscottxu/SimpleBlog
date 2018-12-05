@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Scottxu.Blog.Models;
 using Scottxu.Blog.Models.Exception;
+
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Scottxu.Blog.Controllers
@@ -12,7 +13,9 @@ namespace Scottxu.Blog.Controllers
     public class SetupController : BaseController
     {
         IHostingEnvironment HostingEnvironment { get; }
-        public SetupController(BlogSystemContext context, IOptions<SiteOptions> options, IHostingEnvironment hostingEnvironment) : base(context, options) => HostingEnvironment = hostingEnvironment;
+
+        public SetupController(BlogSystemContext context, IOptions<SiteOptions> options,
+            IHostingEnvironment hostingEnvironment) : base(context, options) => HostingEnvironment = hostingEnvironment;
 
         // GET: /Setup
         public IActionResult Index()
@@ -23,23 +26,28 @@ namespace Scottxu.Blog.Controllers
 
         internal class DataBaseIsExistException : Exception
         {
-            public DataBaseIsExistException(string message) : base(message) { }
+            public DataBaseIsExistException(string message) : base(message)
+            {
+            }
         }
 
         // GET: /Setup/Install
         [ApiAction]
         [HttpPost]
-        public async Task Install(String email, String password, String blogName, String userName) 
+        public async Task Install(string email, string password, string blogName, string userName)
         {
             if (DataBaseContext.DataBaseIsExist) throw new DataBaseIsExistException("数据库已存在。");
-            if (String.IsNullOrEmpty(email) || String.IsNullOrEmpty(password) || String.IsNullOrEmpty(blogName) || String.IsNullOrEmpty(userName))
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(blogName) ||
+                string.IsNullOrEmpty(userName))
                 throw new MissingParametersException("缺少参数。");
-            BlogSystemDatabaseInitializer.Seed(HttpContext, DataBaseContext, HostingEnvironment, new BlogSystemDatabaseInitializer.Configs() {
-                Email = email,
-                Password = password,
-                BlogName = blogName,
-                UserName = userName
-            });
+            BlogSystemDatabaseInitializer.Seed(HttpContext, DataBaseContext, HostingEnvironment,
+                new BlogSystemDatabaseInitializer.Configs()
+                {
+                    Email = email,
+                    Password = password,
+                    BlogName = blogName,
+                    UserName = userName
+                });
             await UserLoginAsync(email);
         }
     }

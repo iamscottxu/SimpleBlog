@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
-using Scottxu.Blog.Models.Helpers;
 
-namespace Scottxu.Blog.Models.Units
+namespace Scottxu.Blog.Models.Helpers
 {
     /// <summary>
     /// 单相混淆加密用户密码，并比较密码是否一致的类
     /// </summary>
-    public class PasswordUnit
+    public static class PasswordHelper
     {
         #region field & constructor
 

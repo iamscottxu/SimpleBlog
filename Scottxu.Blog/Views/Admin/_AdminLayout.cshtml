@@ -2,13 +2,14 @@
     Layout = "_Layout";
     ViewBag.Title = " - 后台管理";
 }
+
 @section Head {
     <link rel="icon" type="image/png" blog-href="assets/admin/i/favicon.png">
     <link rel="apple-touch-icon-precomposed" blog-href="assets/admin/i/app-icon72x72@2x.png">
-    <meta name="apple-mobile-web-app-title" content="Simple Blog" />
-    <link rel="stylesheet" blog-href="assets/admin/css/amazeui.min.css" />
-    <link rel="stylesheet" blog-href="assets/admin/css/amazeui.chosen.css" />
-    <link rel="stylesheet" blog-href="assets/admin/css/chosen.css" />
+    <meta name="apple-mobile-web-app-title" content="Simple Blog"/>
+    <link rel="stylesheet" blog-href="assets/admin/css/amazeui.min.css"/>
+    <link rel="stylesheet" blog-href="assets/admin/css/amazeui.chosen.css"/>
+    <link rel="stylesheet" blog-href="assets/admin/css/chosen.css"/>
     <link rel="stylesheet" blog-href="assets/admin/css/admin.css">
     <link rel="stylesheet" blog-href="assets/admin/css/app.css">
     <script blog-src="assets/admin/js/jquery.min.js"></script>
@@ -27,6 +28,7 @@
     </script>
     @RenderSection("Head", required: false)
 }
+
 <header class="am-topbar am-topbar-inverse admin-header">
     <div class="am-topbar-brand">
         <a href="/" class="tpl-logo">
@@ -37,25 +39,44 @@
 
     </div>
 
-    <button class="am-topbar-btn am-topbar-toggle am-btn am-btn-sm am-btn-success am-show-sm-only" data-am-collapse="{target: '#topbar-collapse'}"><span class="am-sr-only">导航切换</span> <span class="am-icon-bars"></span></button>
+    <button class="am-topbar-btn am-topbar-toggle am-btn am-btn-sm am-btn-success am-show-sm-only" data-am-collapse="{target: '#topbar-collapse'}">
+        <span class="am-sr-only">导航切换</span> <span class="am-icon-bars"></span>
+    </button>
 
     <div class="am-collapse am-topbar-collapse" id="topbar-collapse">
 
         <ul class="am-nav am-nav-pills am-topbar-nav am-topbar-right admin-header-list tpl-header-list">
 
-            <li class="am-hide-sm-only"><a href="javascript:;" id="admin-fullscreen" class="tpl-header-list-link"><span class="am-icon-arrows-alt"></span> <span class="admin-fullText">开启全屏</span></a></li>
+            <li class="am-hide-sm-only">
+                <a href="javascript:;" id="admin-fullscreen" class="tpl-header-list-link">
+                    <span class="am-icon-arrows-alt"></span> <span class="admin-fullText">开启全屏</span>
+                </a>
+            </li>
 
             <li class="am-dropdown" data-am-dropdown data-am-dropdown-toggle>
                 <a class="am-dropdown-toggle tpl-header-list-link" href="javascript:;">
-                    <span class="tpl-header-list-user-nick">@(ViewBag.userName)</span><span class="tpl-header-list-user-ico"> <img blog-src="assets/admin/img/user01.png"></span>
+                    <span class="tpl-header-list-user-nick">@(ViewBag.userName)</span>
+                    <span class="tpl-header-list-user-ico">
+                        <img blog-src="assets/admin/img/user01.png">
+                    </span>
                 </a>
                 <ul class="am-dropdown-content">
-                    <li><a href="#"><span class="am-icon-bell-o"></span> 资料</a></li>
-                    <li><a href="#"><span class="am-icon-cog"></span> 设置</a></li>
-                    <li><a href="~/GoAccount/Logout"><span class="am-icon-power-off"></span> 退出</a></li>
+                    <li>
+                        <a href="#"><span class="am-icon-bell-o"></span> 资料</a>
+                    </li>
+                    <li>
+                        <a href="#"><span class="am-icon-cog"></span> 设置</a>
+                    </li>
+                    <li>
+                        <a href="~/GoAccount/Logout"><span class="am-icon-power-off"></span> 退出</a>
+                    </li>
                 </ul>
             </li>
-            <li><a href="~/GoAccount/Logout" class="tpl-header-list-link"><span class="am-icon-sign-out tpl-header-list-ico-out-size"></span></a></li>
+            <li>
+                <a href="~/GoAccount/Logout" class="tpl-header-list-link">
+                    <span class="am-icon-sign-out tpl-header-list-ico-out-size"></span>
+                </a>
+            </li>
         </ul>
     </div>
 </header>
@@ -113,8 +134,12 @@
         <div class="tpl-content-page-title page-title">
         </div>
         <ol class="am-breadcrumb">
-            <li><a href="/" class="am-icon-home">首页</a></li>
-            <li><a blog-admin-href="">博客管理</a></li>
+            <li>
+                <a href="/" class="am-icon-home">首页</a>
+            </li>
+            <li>
+                <a blog-admin-href="">博客管理</a>
+            </li>
             <li class="am-active page-title"></li>
         </ol>
         @RenderBody()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Scottxu.Blog.Models.Entitys
 {
     /// <summary>
@@ -13,13 +14,13 @@ namespace Scottxu.Blog.Models.Entitys
         /// </summary>
         /// <value>键</value>
         [Key, StringLength(50), DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public String Key { get; set; }
+        public string Key { get; set; }
 
         /// <summary>
         /// 获取或设置值。
         /// </summary>
         /// <value>值</value>
         [MaxLength]
-        public String Value { get; set; }
+        public string Value { get; set; }
     }
 }

@@ -1,6 +1,5 @@
-﻿
-$(function () {
-     $('#btn_Login').click(function () {
+﻿$(function () {
+    $('#btn_Login').click(function () {
         let btn_Login = $('#btn_Login');
         let email = $('#email');
         let password = $('#password');
@@ -23,7 +22,8 @@ $(function () {
         getCaptchaText(login, {email: email.val(), password: password.val()});
         return false;
     });
-    function login (captchaText, data) {
+
+    function login(captchaText, data) {
         let btn_Login = $('#btn_Login');
         if (captchaText == '') {
             showMessage('未完成人机验证。');
@@ -63,17 +63,21 @@ $(function () {
             });
         }
     }
+
     //获取参数值
     function getQueryString(name) {
         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
         var r = window.location.search.substr(1).match(reg);
-        if (r != null) return decodeURI(unescape(r[2])); return null;
+        if (r != null) return decodeURI(unescape(r[2]));
+        return null;
     }
+
     function showMessage(message) {
         let messagebox = $('#message');
         messagebox.css('display', 'inherit');
         messagebox.text(message);
     }
+
     function hideMessage() {
         let messagebox = $('#message');
         messagebox.css('display', 'none');

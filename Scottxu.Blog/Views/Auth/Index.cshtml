@@ -13,8 +13,9 @@
     <script blog-src="assets/admin/js/amazeui.min.js"></script>
     <script blog-src="assets/common/js/md5-min.js"></script>
     <script blog-src="assets/auth/js/index.js"></script>
-    @await Component.InvokeAsync("CaptchaHead", new { action = "admin_login"})
+    @await Component.InvokeAsync("CaptchaHead", new {action = "admin_login"})
 }
+
 <div class="am-g myapp-login">
     <div class="myapp-login-logo-block  tpl-login-max">
         <div class="myapp-login-logo-text">
@@ -41,7 +42,9 @@
                     <div class="am-form-group">
                         @await Component.InvokeAsync("CaptchaDiv")
                     </div>
-                    <p><button type="submit" class="am-btn am-btn-default" data-am-loading="{spinner: 'circle-o-notch', loadingText: '正在登录……'}" id="btn_Login">登录</button></p>
+                    <p>
+                        <button type="submit" class="am-btn am-btn-default" data-am-loading="{spinner: 'circle-o-notch', loadingText: '正在登录……'}" id="btn_Login">登录</button>
+                    </p>
                 </fieldset>
             </form>
         </div>
