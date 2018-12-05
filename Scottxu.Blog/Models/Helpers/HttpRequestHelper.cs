@@ -6,13 +6,13 @@ using System.Text;
 using Newtonsoft.Json;
 using System.Linq;
 
-namespace Scottxu.Blog.Models.Helper
+namespace Scottxu.Blog.Models.Helpers
 {
     public static class HttpRequestHelper
     {
-
         static string GetParametersString(IDictionary<string, string> parameters)
-            => string.Join("&", parameters.ToList().Select(k => $"{WebUtility.UrlEncode(k.Key)}={WebUtility.UrlEncode(k.Value)}"));
+            => string.Join("&",
+                parameters.ToList().Select(k => $"{WebUtility.UrlEncode(k.Key)}={WebUtility.UrlEncode(k.Value)}"));
 
         /// <summary>
         /// 发送http post请求
@@ -22,19 +22,19 @@ namespace Scottxu.Blog.Models.Helper
         /// <returns></returns>
         public static HttpWebResponse CreatePostResponse(string url, IDictionary<string, string> parameters)
         {
-            var request = WebRequest.Create(url) as HttpWebRequest;//创建请求对象
-            request.Method = "POST";//请求方式
-            request.ContentType = "application/x-www-form-urlencoded";//链接类型
-                                                                      //构造查询字符串
-            if (!(parameters == null || parameters.Count == 0))
+            var request = WebRequest.Create(url); //创建请求对象
+
+            request.Method = "POST"; //请求方式
+            request.ContentType = "application/x-www-form-urlencoded"; //链接类型
+            //构造查询字符串
+            if (parameters == null || parameters.Count == 0) return request.GetResponse() as HttpWebResponse;
+            var data = Encoding.UTF8.GetBytes(GetParametersString(parameters));
+            //写入请求流
+            using (var stream = request.GetRequestStream())
             {
-                byte[] data = Encoding.UTF8.GetBytes(GetParametersString(parameters));
-                //写入请求流
-                using (var stream = request.GetRequestStream())
-                {
-                    stream.Write(data, 0, data.Length);
-                }
+                stream.Write(data, 0, data.Length);
             }
+
             return request.GetResponse() as HttpWebResponse;
         }
 
@@ -46,9 +46,9 @@ namespace Scottxu.Blog.Models.Helper
         /// <returns></returns>
         public static HttpWebResponse CreateGetResponse(string url, IDictionary<string, string> parameters)
         {
-            HttpWebRequest request = WebRequest.Create($"{url}?{GetParametersString(parameters)}") as HttpWebRequest;
+            var request = WebRequest.Create($"{url}?{GetParametersString(parameters)}");
             request.Method = "GET";
-            request.ContentType = "application/x-www-form-urlencoded";//链接类型
+            request.ContentType = "application/x-www-form-urlencoded"; //链接类型
             return request.GetResponse() as HttpWebResponse;
         }
 
@@ -61,7 +61,7 @@ namespace Scottxu.Blog.Models.Helper
         {
             using (var stream = response.GetResponseStream())
             {
-                StreamReader reader = new StreamReader(stream, Encoding.UTF8);
+                var reader = new StreamReader(stream, Encoding.UTF8);
                 return reader.ReadToEnd();
             }
         }

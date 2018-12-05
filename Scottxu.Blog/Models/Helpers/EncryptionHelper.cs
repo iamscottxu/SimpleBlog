@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-namespace Scottxu.Blog.Models.Helper
+
+namespace Scottxu.Blog.Models.Helpers
 {
     /// <summary>
     /// 加密解密帮助类
@@ -15,13 +17,10 @@ namespace Scottxu.Blog.Models.Helper
         /// <returns>字符串MD5哈希值的十六进制字符串</returns>
         public static string StringToMD5Hash(string inputString)
         {
-            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
-            byte[] encryptedBytes = md5.ComputeHash(Encoding.ASCII.GetBytes(inputString));
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < encryptedBytes.Length; i++)
-            {
-                sb.AppendFormat("{0:x2}", encryptedBytes[i]);
-            }
+            var md5 = new MD5CryptoServiceProvider();
+            var encryptedBytes = md5.ComputeHash(Encoding.ASCII.GetBytes(inputString));
+            var sb = new StringBuilder();
+            encryptedBytes.ToList().ForEach(t => sb.AppendFormat("{0:x2}", t));
             return sb.ToString();
         }
     }

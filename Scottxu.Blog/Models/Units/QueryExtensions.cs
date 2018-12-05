@@ -2,22 +2,17 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Scottxu.Blog.Models.Util
+namespace Scottxu.Blog.Models.Units
 {
     public static class QueryExtensions
     {
         public static IQueryable<T> SortBy<T>(this IQueryable<T> source, string sortExpression)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException("source");
-            }
-
-            string sortDirection = String.Empty;
-            string propertyName = String.Empty;
+            string sortDirection;
+            string propertyName;
 
             sortExpression = sortExpression.Trim();
-            int spaceIndex = sortExpression.Trim().IndexOf(" ", StringComparison.Ordinal);
+            var spaceIndex = sortExpression.Trim().IndexOf(" ", StringComparison.Ordinal);
             if (spaceIndex < 0)
             {
                 propertyName = sortExpression;
@@ -33,27 +28,24 @@ namespace Scottxu.Blog.Models.Util
             //有关联属性
             if (propertyName.IndexOf('.') > 0)
             {
-                if (sortDirection == "ASC")
-                    return source.OrderBy(propertyName);
-                else
-                    return source.OrderByDescending(propertyName);
+                return sortDirection == "ASC" ? source.OrderBy(propertyName) : source.OrderByDescending(propertyName);
             }
             //////////////////////////////
 
-            if (String.IsNullOrEmpty(propertyName))
+            if (string.IsNullOrEmpty(propertyName))
             {
                 return source;
             }
 
-            ParameterExpression parameter = Expression.Parameter(source.ElementType, String.Empty);
-            MemberExpression property = Expression.Property(parameter, propertyName);
-            LambdaExpression lambda = Expression.Lambda(property, parameter);
+            var parameter = Expression.Parameter(source.ElementType, string.Empty);
+            var property = Expression.Property(parameter, propertyName);
+            var lambda = Expression.Lambda(property, parameter);
 
-            string methodName = (sortDirection == "ASC") ? "OrderBy" : "OrderByDescending";
+            var methodName = (sortDirection == "ASC") ? "OrderBy" : "OrderByDescending";
 
             Expression methodCallExpression = Expression.Call(typeof(Queryable), methodName,
-                                                new Type[] { source.ElementType, property.Type },
-                                                source.Expression, Expression.Quote(lambda));
+                new Type[] {source.ElementType, property.Type},
+                source.Expression, Expression.Quote(lambda));
 
             return source.Provider.CreateQuery<T>(methodCallExpression);
         }
@@ -68,6 +60,7 @@ namespace Scottxu.Blog.Models.Util
             ThenBy = 2,
             ThenByDescending = 3
         }
+
         /// <summary>
         /// 升序排序
         /// </summary>
@@ -76,9 +69,7 @@ namespace Scottxu.Blog.Models.Util
         /// <param name="property"></param>
         /// <returns></returns>
         public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string property)
-        {
-            return ApplyOrder<T>(source, property, EOrderType.OrderBy);
-        }
+            => ApplyOrder<T>(source, property, EOrderType.OrderBy);
 
         /// <summary>
         /// 降序排序
@@ -88,9 +79,8 @@ namespace Scottxu.Blog.Models.Util
         /// <param name="property"></param>
         /// <returns></returns>
         public static IOrderedQueryable<T> OrderByDescending<T>(this IQueryable<T> source, string property)
-        {
-            return ApplyOrder<T>(source, property, EOrderType.OrderByDescending);
-        }
+            => ApplyOrder<T>(source, property, EOrderType.OrderByDescending);
+
         /// <summary>
         /// 应用排序
         /// </summary>
@@ -98,32 +88,36 @@ namespace Scottxu.Blog.Models.Util
         /// <param name="source"></param>
         /// <param name="property"></param>
         /// <param name="methodName"></param>
+        /// <param name="orderType"></param>
         /// <returns></returns>
-        public static IOrderedQueryable<T> ApplyOrder<T>(this IQueryable<T> source, string property, EOrderType orderType)
+        public static IOrderedQueryable<T> ApplyOrder<T>(this IQueryable<T> source, string property,
+            EOrderType orderType)
         {
             var methodName = orderType.ToString();
 
-            string[] props = property.Split('.');
-            Type type = typeof(T);
-            ParameterExpression arg = Expression.Parameter(type, "x");
+            var props = property.Split('.');
+            var type = typeof(T);
+            var arg = Expression.Parameter(type, "x");
             Expression expr = arg;
-            foreach (string prop in props)
+            foreach (var prop in props)
             {
                 // use reflection (not ComponentModel) to mirror LINQ 
-                System.Reflection.PropertyInfo pi = type.GetProperty(prop);
+                var pi = type.GetProperty(prop);
                 expr = Expression.Property(expr, pi);
                 type = pi.PropertyType;
             }
-            Type delegateType = typeof(Func<,>).MakeGenericType(typeof(T), type);
-            LambdaExpression lambda = Expression.Lambda(delegateType, expr, arg);
-            object result = typeof(Queryable).GetMethods().Single(method => method.Name == methodName
-                            && method.IsGenericMethodDefinition
-                            && method.GetGenericArguments().Length == 2
-                            && method.GetParameters().Length == 2)
-                            .MakeGenericMethod(typeof(T), type)
-                            .Invoke(null, new object[] { source, lambda });
-            return (IOrderedQueryable<T>)result;
+
+            var delegateType = typeof(Func<,>).MakeGenericType(typeof(T), type);
+            var lambda = Expression.Lambda(delegateType, expr, arg);
+            var result = typeof(Queryable).GetMethods().Single(method => method.Name == methodName
+                                                                         && method.IsGenericMethodDefinition
+                                                                         && method.GetGenericArguments().Length == 2
+                                                                         && method.GetParameters().Length == 2)
+                .MakeGenericMethod(typeof(T), type)
+                .Invoke(null, new object[] {source, lambda});
+            return (IOrderedQueryable<T>) result;
         }
+
         /// <summary>
         /// ThenBy
         /// </summary>
@@ -147,6 +141,5 @@ namespace Scottxu.Blog.Models.Util
         {
             return ApplyOrder<T>(source, property, EOrderType.ThenByDescending);
         }
-
     }
 }

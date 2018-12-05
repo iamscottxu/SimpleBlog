@@ -16,9 +16,9 @@ namespace Scottxu.Blog.Models.Helper
 
         public List<Config> Configs { get; private set; }
 
-        List<String> changedKeys = new List<string>();
+        readonly List<string> _changedKeys = new List<string>();
 
-        List<Config> addKeys = new List<Config>();
+        readonly List<Config> _addKeys = new List<Config>();
 
         #endregion
 
@@ -38,19 +38,23 @@ namespace Scottxu.Blog.Models.Helper
         /// 获取或设置 <see cref="T:Scottxu.Blog.Models.Helper.ConfigHelper"/> 的值
         /// </summary>
         /// <param name="key">键</param>
-        public String this[String key] {
+        public string this[string key]
+        {
             get => Configs.Where(c => c.Key == key).Select(c => c.Value).FirstOrDefault();
-            set {
+            set
+            {
                 var config = Configs.FirstOrDefault(c => c.Key == key);
-                if (config == null) {
-                    addKeys.Add(new Config(){
+                if (config == null)
+                {
+                    _addKeys.Add(new Config()
+                    {
                         Key = key,
                         Value = value
                     });
                 }
                 else if (config.Value != value)
                 {
-                    changedKeys.Add(key);
+                    _changedKeys.Add(key);
                     config.Value = value;
                 }
             }
@@ -61,9 +65,9 @@ namespace Scottxu.Blog.Models.Helper
         /// </summary>
         public void SaveAll()
         {
-            var changedConfigs = dataBaseContext.Configs.Where(c => changedKeys.Contains(c.Key));
+            var changedConfigs = dataBaseContext.Configs.Where(c => _changedKeys.Contains(c.Key));
             changedConfigs.ToList().ForEach(changed => changed.Value = this[changed.Key]);
-            dataBaseContext.Configs.AddRange(addKeys);
+            dataBaseContext.Configs.AddRange(_addKeys);
             dataBaseContext.SaveChanges();
             Configs = dataBaseContext.Configs.ToList();
         }
@@ -107,6 +111,16 @@ namespace Scottxu.Blog.Models.Helper
             get => this["UserName"];
             set => this["UserName"] = value;
         }
+
+        /// <summary>
+        /// 模板GUID
+        /// </summary>
+        public string TemplateGuid
+        {
+            get => this["templateGuid"];
+            set => this["templateGuid"] = value;
+        }
+
         #endregion
     }
 }

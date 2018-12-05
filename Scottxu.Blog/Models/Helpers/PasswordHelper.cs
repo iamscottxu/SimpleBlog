@@ -1,18 +1,22 @@
-﻿
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
-using Scottxu.Blog.Models.Helper;
+using Scottxu.Blog.Models.Helpers;
 
-namespace Scottxu.Blog.Models.Util
+namespace Scottxu.Blog.Models.Units
 {
     /// <summary>
     /// 单相混淆加密用户密码，并比较密码是否一致的类
     /// </summary>
-    public class PasswordUtil
+    public class PasswordUnit
     {
         #region field & constructor
 
-        const int saltLength = 16;
+        /// <summary>
+        /// 盐的长度
+        /// </summary>
+        private const int SaltLength = 16;
 
         #endregion
 
@@ -24,27 +28,25 @@ namespace Scottxu.Blog.Models.Util
         /// <returns></returns>
         public static bool ComparePasswords(string dbPassword, string userPassword)
         {
-            byte[] dbPwd = Convert.FromBase64String(dbPassword);
+            var dbPwd = Convert.FromBase64String(dbPassword);
 
-            byte[] hashedPwd = HashString(userPassword);
+            var hashedPwd = HashString(userPassword);
 
-            if (dbPwd.Length == 0 || hashedPwd.Length == 0 || dbPwd.Length != hashedPwd.Length + saltLength)
+            if (dbPwd.Length == 0 || hashedPwd.Length == 0 || dbPwd.Length != hashedPwd.Length + SaltLength)
             {
                 return false;
             }
 
-            byte[] saltValue = new byte[saltLength];
+            var saltValue = new byte[SaltLength];
             //  int saltOffset = dbPwd.Length - hashedPwd.Length;
-            int saltOffset = hashedPwd.Length;
-            for (int i = 0; i < saltLength; i++)
+            var saltOffset = hashedPwd.Length;
+            for (var i = 0; i < SaltLength; i++)
                 saltValue[i] = dbPwd[saltOffset + i];
 
-            byte[] saltedPassword = CreateSaltedPassword(saltValue, hashedPwd);
+            var saltedPassword = CreateSaltedPassword(saltValue, hashedPwd);
 
             // compare the values
             return CompareByteArray(dbPwd, saltedPassword);
-
-
         }
 
         /// <summary>
@@ -59,20 +61,21 @@ namespace Scottxu.Blog.Models.Util
             if (md5Encryption)
                 userPassword = EncryptionHelper.StringToMD5Hash(EncryptionHelper.StringToMD5Hash(userPassword));
 
-            byte[] unsaltedPassword = HashString(userPassword);
+            var unsaltedPassword = HashString(userPassword);
 
             //Create a salt value
-            byte[] saltValue = new byte[saltLength];
-            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+            var saltValue = new byte[SaltLength];
+            var rng = new RNGCryptoServiceProvider();
             rng.GetBytes(saltValue);
 
-            byte[] saltedPassword = CreateSaltedPassword(saltValue, unsaltedPassword);
+            var saltedPassword = CreateSaltedPassword(saltValue, unsaltedPassword);
 
 
             return Convert.ToBase64String(saltedPassword);
         }
 
         #region 私有函数
+
         /// <summary>
         /// 将一个字符串哈希化
         /// </summary>
@@ -80,43 +83,40 @@ namespace Scottxu.Blog.Models.Util
         /// <returns></returns>
         private static byte[] HashString(string str)
         {
-            byte[] pwd = System.Text.Encoding.UTF8.GetBytes(str);
+            var pwd = System.Text.Encoding.UTF8.GetBytes(str);
 
-            SHA1 sha1 = SHA1.Create();
-            byte[] saltedPassword = sha1.ComputeHash(pwd);
+            var sha1 = SHA1.Create();
+            var saltedPassword = sha1.ComputeHash(pwd);
             return saltedPassword;
         }
-        static bool CompareByteArray(byte[] array1, byte[] array2)
+
+        static bool CompareByteArray(IReadOnlyList<byte> array1, IReadOnlyList<byte> array2)
         {
-            if (array1.Length != array2.Length)
+            if (array1.Count != array2.Count)
                 return false;
-            for (int i = 0; i < array1.Length; i++)
-            {
-                if (array1[i] != array2[i])
-                    return false;
-            }
-            return true;
+            return !array1.Where((t, i) => t != array2[i]).Any();
         }
+
         // create a salted password given the salt value
         static byte[] CreateSaltedPassword(byte[] saltValue, byte[] unsaltedPassword)
         {
             // add the salt to the hash
-            byte[] rawSalted = new byte[unsaltedPassword.Length + saltValue.Length];
+            var rawSalted = new byte[unsaltedPassword.Length + saltValue.Length];
             unsaltedPassword.CopyTo(rawSalted, 0);
             saltValue.CopyTo(rawSalted, unsaltedPassword.Length);
 
             //Create the salted hash            
-            SHA1 sha1 = SHA1.Create();
-            byte[] saltedPassword = sha1.ComputeHash(rawSalted);
+            var sha1 = SHA1.Create();
+            var saltedPassword = sha1.ComputeHash(rawSalted);
 
             // add the salt value to the salted hash
-            byte[] dbPassword = new byte[saltedPassword.Length + saltValue.Length];
+            var dbPassword = new byte[saltedPassword.Length + saltValue.Length];
             saltedPassword.CopyTo(dbPassword, 0);
             saltValue.CopyTo(dbPassword, saltedPassword.Length);
 
             return dbPassword;
         }
-        #endregion
 
+        #endregion
     }
 }

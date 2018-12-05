@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Scottxu.Blog.Models.Util
+namespace Scottxu.Blog.Models.Units
 {
-    public class AppSettingsUtil
+    public class AppSettingsUnit
     {
         public IConfiguration Configuration { get; }
 
-        public AppSettingsUtil(IConfiguration configuration)
+        public AppSettingsUnit(IConfiguration configuration)
         {
             Configuration = configuration;
         }
@@ -33,9 +33,9 @@ namespace Scottxu.Blog.Models.Util
 
         public Action<CookieAuthenticationOptions> GetCookieAuthenticationOptions()
         {
-            var SectionConfiguration = Configuration.GetSection("CookieAuthenticationOptions");
-            var cookieName = SectionConfiguration["Name"];
-            var cookieDomain = SectionConfiguration["Domain"];
+            var sectionConfiguration = Configuration.GetSection("CookieAuthenticationOptions");
+            var cookieName = sectionConfiguration["Name"];
+            var cookieDomain = sectionConfiguration["Domain"];
             if (string.IsNullOrEmpty(cookieName)) cookieName = "SimpleBlog_AuthTicket";
             return options =>
             {

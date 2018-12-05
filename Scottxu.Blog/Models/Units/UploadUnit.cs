@@ -1,27 +1,27 @@
-﻿using System.Linq;
+﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
 using System.IO;
-using Scottxu.Blog.Models.Entitys;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Hosting;
-using System;
-using Microsoft.EntityFrameworkCore;
-using ICSharpCode.SharpZipLib.Zip;
-using Microsoft.AspNetCore.StaticFiles;
 using ICSharpCode.SharpZipLib.Core;
+using ICSharpCode.SharpZipLib.Zip;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
+using Scottxu.Blog.Models.Entitys;
 
-namespace Scottxu.Blog.Models.Helper
+namespace Scottxu.Blog.Models.Units
 {
     /// <summary>
     /// 文件上传帮助类
     /// </summary>
-    public class UploadHelper
+    public class UploadUnit
     {
-        readonly BlogSystemContext dataBaseContext;
-        readonly IHostingEnvironment hostingEnvironment;
-        const string UPLOAD_PATH = "/upload";
+        readonly BlogSystemContext _dataBaseContext;
+        readonly IHostingEnvironment _hostingEnvironment;
+        const string UploadPath = "/upload";
 
         /// <summary>
         /// 上传文件信息类
@@ -54,12 +54,12 @@ namespace Scottxu.Blog.Models.Helper
         }
 
         /// <summary>
-        /// 初始化 <see cref="T:Scottxu.Blog.Models.Helper.UploadHelper"/> 类的实例。
+        /// 初始化 <see cref="T:Scottxu.Blog.Models.Units.UploadUnit"/> 类的实例。
         /// </summary>
         /// <param name="dataBaseContext">数据库环境</param>
         /// <param name="hostingEnvironment">主机环境信息</param>
-        public UploadHelper(BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment)
-            => (this.dataBaseContext, this.hostingEnvironment) = (dataBaseContext, hostingEnvironment);
+        public UploadUnit(BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment)
+            => (this._dataBaseContext, this._hostingEnvironment) = (dataBaseContext, hostingEnvironment);
 
         /// <summary>
         /// 保存文件并写入记录到数据库。
@@ -78,17 +78,18 @@ namespace Scottxu.Blog.Models.Helper
                     MIME = q.ContentType
                 };
                 var sha1 = GetFileSHA1(q.OpenReadStream());
-                var uploadedFile = dataBaseContext.UploadedFiles.FirstOrDefault(m => m.SHA1 == sha1);
-                if (uploadedFile == null) formFileInfo.UploadedFile = new UploadedFile()
-                {
-                    FileName = SaveFileToDisk(q.OpenReadStream()),
-                    SHA1 = sha1,
-                    //SessionId = session.Id
-                };
+                var uploadedFile = _dataBaseContext.UploadedFiles.FirstOrDefault(m => m.SHA1 == sha1);
+                if (uploadedFile == null)
+                    formFileInfo.UploadedFile = new UploadedFile()
+                    {
+                        FileName = SaveFileToDisk(q.OpenReadStream()),
+                        SHA1 = sha1,
+                        //SessionId = session.Id
+                    };
                 else formFileInfo.UploadedFile = uploadedFile;
                 return formFileInfo;
             }).ToList();
-            dataBaseContext.UploadedFiles.AddRange(formFileInfos.Select(o => o.UploadedFile).Where(q => false));
+            _dataBaseContext.UploadedFiles.AddRange(formFileInfos.Select(o => o.UploadedFile).Where(q => false));
             return formFileInfos;
         }
 
@@ -110,46 +111,48 @@ namespace Scottxu.Blog.Models.Helper
         /// </summary>
         /// <returns>上传文件信息的集合</returns>
         /// <param name="httpContext">Http上下文</param>
+        /// <param name="fileStream">文件流</param>
         public List<FormFileInfo> SaveZipFiles(HttpContext httpContext, Stream fileStream)
         {
             //var session = httpContext.Session;
-            List<FormFileInfo> formFileInfos = new List<FormFileInfo>();
+            var formFileInfos = new List<FormFileInfo>();
             using (var zipInputStream = new ZipInputStream(fileStream))
             {
                 ZipEntry zipEntry;
                 while ((zipEntry = zipInputStream.GetNextEntry()) != null)
                 {
-                    if (zipEntry.IsFile)
+                    if (!zipEntry.IsFile) continue;
+                    var memoryStream = new MemoryStream();
+                    var buffer = new byte[4096];
+                    StreamUtils.Copy(zipInputStream, memoryStream, buffer);
+                    memoryStream.Position = 0;
+                    var sha1 = GetFileSHA1(memoryStream);
+                    var uploadedFile = _dataBaseContext.UploadedFiles.FirstOrDefault(m => m.SHA1 == sha1) ??
+                                       formFileInfos.Select(o => o.UploadedFile)
+                                           .FirstOrDefault(m => m.SHA1 == sha1);
+                    if (uploadedFile == null)
                     {
-                        var memoryStream = new MemoryStream();
-                        byte[] buffer = new byte[4096];
-                        StreamUtils.Copy(zipInputStream, memoryStream, buffer);
                         memoryStream.Position = 0;
-                        string sha1 = GetFileSHA1(memoryStream);
-                        var uploadedFile = dataBaseContext.UploadedFiles.FirstOrDefault(m => m.SHA1 == sha1);
-                        if (uploadedFile == null) uploadedFile = formFileInfos.Select(o => o.UploadedFile).FirstOrDefault(m => m.SHA1 == sha1);
-                        if (uploadedFile == null)
+                        var fileName = SaveFileToDisk(memoryStream);
+                        uploadedFile = new UploadedFile
                         {
-                            memoryStream.Position = 0;
-                            string fileName = SaveFileToDisk(memoryStream);
-                            uploadedFile = new UploadedFile
-                            {
-                                FileName = fileName,
-                                SHA1 = sha1,
-                                //SessionId = session.Id
-                            };
-                        }
-                        var formFileInfo = new FormFileInfo()
-                        {
-                            UploadedFile = uploadedFile,
-                            FileName = Path.GetFileName(zipEntry.Name),
-                            VirtualPath = $"/{zipEntry.Name}",
-                            MIME = GetMappings(zipEntry.Name)
+                            FileName = fileName,
+                            SHA1 = sha1,
+                            //SessionId = session.Id
                         };
-                        formFileInfos.Add(formFileInfo);
                     }
+
+                    var formFileInfo = new FormFileInfo()
+                    {
+                        UploadedFile = uploadedFile,
+                        FileName = Path.GetFileName(zipEntry.Name),
+                        VirtualPath = $"/{zipEntry.Name}",
+                        MIME = GetMappings(zipEntry.Name)
+                    };
+                    formFileInfos.Add(formFileInfo);
                 }
-                dataBaseContext.UploadedFiles.AddRange(formFileInfos.Select(o => o.UploadedFile).Where(q => false));
+
+                _dataBaseContext.UploadedFiles.AddRange(formFileInfos.Select(o => o.UploadedFile).Where(q => false));
                 return formFileInfos;
             }
         }
@@ -160,26 +163,25 @@ namespace Scottxu.Blog.Models.Helper
         /// <param name="uploadedFileGuid">要删除文件在数据库中的Guid</param>
         public void CheckAndDeleteFile(Guid uploadedFileGuid)
         {
-            UploadedFile uploadedFile = dataBaseContext.UploadedFiles
-                                                       .Include(o => o.TemplateFiles)
-                                                       .Include(o => o.UploadedFileArticles)
-                                                       .FirstOrDefault(q => q.Guid == uploadedFileGuid);
+            var uploadedFile = _dataBaseContext.UploadedFiles
+                .Include(o => o.TemplateFiles)
+                .Include(o => o.UploadedFileArticles)
+                .FirstOrDefault(q => q.Guid == uploadedFileGuid);
 
             var templateFiles = new List<TemplateFile>();
+            if (uploadedFile == null) return;
             uploadedFile.TemplateFiles.ToList().ForEach(n =>
             {
-                if (dataBaseContext.Entry(n).State != EntityState.Deleted) templateFiles.Add(n);
+                if (_dataBaseContext.Entry(n).State != EntityState.Deleted) templateFiles.Add(n);
             });
-            var UploadedFileArticles = new List<UploadedFileArticle>();
+            var uploadedFileArticles = new List<UploadedFileArticle>();
             uploadedFile.UploadedFileArticles.ToList().ForEach(n =>
             {
-                if (dataBaseContext.Entry(n).State != EntityState.Deleted) UploadedFileArticles.Add(n);
+                if (_dataBaseContext.Entry(n).State != EntityState.Deleted) uploadedFileArticles.Add(n);
             });
-            if (!UploadedFileArticles.Any() && !templateFiles.Any())
-            {
-                DeleteFileFromDisk(GetFileInfo(uploadedFile));
-                dataBaseContext.UploadedFiles.Remove(uploadedFile);
-            }
+            if (uploadedFileArticles.Any() || templateFiles.Any()) return;
+            DeleteFileFromDisk(GetFileInfo(uploadedFile));
+            _dataBaseContext.UploadedFiles.Remove(uploadedFile);
         }
 
         /// <summary>
@@ -188,7 +190,7 @@ namespace Scottxu.Blog.Models.Helper
         /// <returns>文件信息</returns>
         /// <param name="uploadedFile">上传文件实体</param>
         public FileInfo GetFileInfo(UploadedFile uploadedFile)
-            => new FileInfo($"{hostingEnvironment.ContentRootPath}{UPLOAD_PATH}/{uploadedFile.FileName}");
+            => new FileInfo($"{_hostingEnvironment.ContentRootPath}{UploadPath}/{uploadedFile.FileName}");
 
         /// <summary>
         /// 保存文件到磁盘
@@ -198,7 +200,7 @@ namespace Scottxu.Blog.Models.Helper
         string SaveFileToDisk(Stream stream)
         {
             var fileName = Guid.NewGuid().ToString("N");
-            var fileStream = File.Create($"{hostingEnvironment.ContentRootPath}{UPLOAD_PATH}/{fileName}");
+            var fileStream = File.Create($"{_hostingEnvironment.ContentRootPath}{UploadPath}/{fileName}");
             stream.CopyTo(fileStream);
             fileStream.Close();
             return fileName;
@@ -240,9 +242,9 @@ namespace Scottxu.Blog.Models.Helper
         /// <param name="fileName">File name.</param>
         static string GetMappings(string fileName)
         {
-            string extensionName = Path.GetExtension(fileName);
+            var extensionName = Path.GetExtension(fileName);
             var fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
-            if (!fileExtensionContentTypeProvider.Mappings.TryGetValue(extensionName, out string value))
+            if (!fileExtensionContentTypeProvider.Mappings.TryGetValue(extensionName, out var value))
                 value = "application/octet-stream";
             return value;
         }
