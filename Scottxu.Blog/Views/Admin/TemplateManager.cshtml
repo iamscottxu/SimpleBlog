@@ -2,7 +2,7 @@
     Layout = "_AdminLayout";
     ViewBag.PageName = "template";
 }
-@model Scottxu.Blog.Models.ViewModel.Admin.TemplateManagerViewModel
+@model Scottxu.Blog.Models.ViewModels.Admin.TemplateManagerViewModel
 
 @section Head {
     <script blog-src="assets/admin/js/templatemanager.js"></script>
@@ -11,7 +11,7 @@
 <div class="tpl-portlet-components">
     <div class="portlet-title">
         <div class="caption font-green bold">
-            <span class="am-icon-file-o"></span> 模板文件列表
+            <span class="am-icon-file-o"></span> 模板列表
         </div>
     </div>
     <div class="tpl-block">
@@ -20,7 +20,7 @@
                 <div class="am-btn-toolbar">
                     <div class="am-btn-group am-btn-group-xs">
                         <button type="button" class="am-btn am-btn-default am-btn-secondary" data-am-modal="{target: '#upload_zip', closeViaDimmer: 0, width: 600, height: 257}"><span class="am-icon-plus"></span> 上传压缩包</button>
-                        <button type="button" class="am-btn am-btn-default am-btn-success" data-am-modal="{target: '#add_item', closeViaDimmer: 0, width: 600, height: 275}"><span class="am-icon-plus"></span> 新增</button>
+                        <button type="button" class="am-btn am-btn-default am-btn-success" data-am-modal="{target: '#add_item', closeViaDimmer: 0, width: 600, height: 200}"><span class="am-icon-plus"></span> 新增</button>
                         <button type="button" class="am-btn am-btn-default am-btn-danger" id="delete_select"><span class="am-icon-trash-o"></span> 删除</button>
                     </div>
                 </div>
@@ -45,23 +45,19 @@
                     <tr>
                         <th class="table-check"></th>
                         <th class="table-title am-hide-sm-only">名称</th>
-                        <th class="table-type am-hide-sm-only">MIME</th>
-                        <th class="table-author">虚拟路径</th>
                         <th class="table-set" style="width: 145px">操作</th>
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach (var templateFile in Model.TemplateFiles)
+                    @foreach (var template in Model.Templates)
                     {
-                        <tr data-guid="@templateFile.Guid">
+                        <tr data-guid="@template.Guid">
                             <td>
-                                <input type="checkbox" name="deleteGuid" value="@templateFile.Guid">
+                                <input type="checkbox" name="deleteGuid" value="@template.Guid">
                             </td>
                             <td class="am-hide-sm-only">
-                                <a href="@templateFile.VirtualPath" target="_blank">@(templateFile.Name)</a>
+                                <a href="TemplateFileManager?templateGuid=@template.Guid" target="_self" class="table-template-name">@(template.Name)</a>
                             </td>
-                            <td class="am-hide-sm-only">@(templateFile.MIME)</td>
-                            <td class="table-template-virtualpath">@(templateFile.VirtualPath)</td>
                             <td>
                                 <div class="am-btn-toolbar">
                                     <div class="am-btn-group am-btn-group-xs">
@@ -96,17 +92,8 @@
         <div class="am-modal-bd">
             <form class="am-form" style="text-align: left;" id="add_item_form" blog-admin-action="TemplateManager_AddItem" method="post">
                 <div class="am-form-group">
-                    <label for="add_item_virtualpath">虚拟路径</label>
-                    <input type="text" class="" id="add_item_virtualpath" name="virtualPath" placeholder="输入虚拟路径" required pattern='(^(\/[^\\\/:*?"<>\|]+)+$)|(^\/$)' maxlength="500">
-                </div>
-                <div class="am-form-group am-form-file">
-                    <label for="add_item_file">文件</label>
-                    <div>
-                        <button type="button" class="am-btn am-btn-default am-btn-sm">
-                            <i class="am-icon-cloud-upload"></i> 选择要上传的文件
-                        </button>
-                    </div>
-                    <input type="file" id="add_item_file" name="file" required>
+                    <label for="add_item_name">名称</label>
+                    <input type="text" class="" id="add_item_name" name="name" placeholder="输入名称" required maxlength="100">
                 </div>
                 <hr/>
                 <div style="text-align: right;">
@@ -129,8 +116,8 @@
             <form class="am-form" style="text-align: left;" id="edit_item_form" blog-admin-action="TemplateManager_EditItem" method="post">
                 <input type="hidden" name="guid" id="edit_item_guid">
                 <div class="am-form-group">
-                    <label for="edit_item_virtualpath">虚拟路径</label>
-                    <input type="text" class="" id="edit_item_virtualpath" name="virtualPath" placeholder="输入虚拟路径" required pattern='(^(\/[^\\\/:*?"<>\|]+)+$)|(^\/$)' maxlength="500">
+                    <label for="edit_item_name">名称</label>
+                    <input type="text" class="" id="edit_item_name" name="name" placeholder="输入名称" required maxlength="100">
                 </div>
                 <hr/>
                 <div style="text-align: right;">
@@ -144,7 +131,7 @@
 <div class="am-modal am-modal-no-btn" tabindex="-1" id="upload_zip">
     <div class="am-modal-dialog">
         <div class="am-modal-hd">
-            上传压缩包
+            上传模板压缩包
             <a class="am-close am-close-spin" data-am-modal-close>
                 <span class="am-icon-times"></span>
             </a>
@@ -152,7 +139,7 @@
         <div class="am-modal-bd">
             <form class="am-form" style="text-align: left;" id="upload_zip_form" blog-admin-action="TemplateManager_UploadZip" method="post">
                 <div class="am-alert am-alert-danger">
-                    <p>警告：上传压缩包将会删除原有模板。</p>
+                    <p>警告：上传模板压缩包会替换具有相同GUID的模板。</p>
                 </div>
                 <div class="am-form-group am-form-file">
                     <label for="upload_zip_file">文件</label>

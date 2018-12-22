@@ -3,7 +3,7 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Scottxu.Blog.Models;
-using Scottxu.Blog.Models.ViewModel.Home;
+using Scottxu.Blog.Models.ViewModels.Home;
 using System.Linq;
 
 namespace Scottxu.Blog.Controllers

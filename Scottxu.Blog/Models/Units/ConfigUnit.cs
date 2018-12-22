@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Scottxu.Blog.Models.Entitys;
+using Scottxu.Blog.Models.Entities;
 
 namespace Scottxu.Blog.Models.Units
 {
@@ -39,7 +39,11 @@ namespace Scottxu.Blog.Models.Units
         /// <param name="key">键</param>
         public string this[string key]
         {
-            get => Configs.Where(c => c.Key == key).Select(c => c.Value).FirstOrDefault();
+            get
+            {
+                
+                return Configs.Where(c => c.Key == key).Select(c => c.Value).FirstOrDefault();
+            }
             set
             {
                 var config = Configs.FirstOrDefault(c => c.Key == key);
@@ -116,8 +120,8 @@ namespace Scottxu.Blog.Models.Units
         /// </summary>
         public string TemplateGuid
         {
-            get => this["templateGuid"];
-            set => this["templateGuid"] = value;
+            get => this["TemplateGuid"];
+            set => this["TemplateGuid"] = value;
         }
 
         #endregion

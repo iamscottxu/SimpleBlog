@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Scottxu.Blog.Models;
-using Scottxu.Blog.Models.Entitys;
-using Scottxu.Blog.Models.ViewModel;
+using Scottxu.Blog.Models.Entities;
+using Scottxu.Blog.Models.ViewModels;
 using Scottxu.Blog.Models.Helpers;
 using Microsoft.EntityFrameworkCore;
 using HtmlAgilityPack;

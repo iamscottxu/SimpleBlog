@@ -14,7 +14,8 @@ namespace Scottxu.Blog.Models.Helpers
             VirtualPath,
             ArticleLabelName,
             ArticleTypeName,
-            ArticleName
+            ArticleName,
+            TemplateName
         }
 
         public static bool FormatVerification(string verifyingString, FormatType formatType,
@@ -67,6 +68,11 @@ namespace Scottxu.Blog.Models.Helpers
         public static bool ArticleNameVerification(string verifyingString)
         {
             return (new Regex(@"^[\S ]{1,50}$")).IsMatch(verifyingString);
+        }
+        
+        public static bool TemplateNameVerification(string verifyingString)
+        {
+            return (new Regex(@"^[\S ]{1,100}$")).IsMatch(verifyingString);
         }
     }
 }

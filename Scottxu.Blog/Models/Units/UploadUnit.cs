@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml.Serialization;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
-using Scottxu.Blog.Models.Entitys;
+using Scottxu.Blog.Models.Entities;
 
 namespace Scottxu.Blog.Models.Units
 {
@@ -83,8 +85,7 @@ namespace Scottxu.Blog.Models.Units
                     formFileInfo.UploadedFile = new UploadedFile()
                     {
                         FileName = SaveFileToDisk(q.OpenReadStream()),
-                        SHA1 = sha1,
-                        //SessionId = session.Id
+                        SHA1 = sha1
                     };
                 else formFileInfo.UploadedFile = uploadedFile;
                 return formFileInfo;
@@ -99,37 +100,69 @@ namespace Scottxu.Blog.Models.Units
         /// </summary>
         /// <returns>上传文件信息的集合</returns>
         /// <param name="httpContext">Http上下文</param>
-        public List<FormFileInfo> SaveZipFiles(HttpContext httpContext)
+        public (Template, List<FormFileInfo>) SaveZipFiles(HttpContext httpContext)
         {
-            var request = httpContext.Request;
-            var formFile = request.Form.Files[0];
-            return SaveZipFiles(httpContext, formFile.OpenReadStream());
+            var formFile = httpContext.Request.Form.Files[0];
+            return SaveZipFiles(formFile.OpenReadStream());
         }
 
         /// <summary>
         /// 保存Zip文件并写入记录到数据库。
         /// </summary>
         /// <returns>上传文件信息的集合</returns>
-        /// <param name="httpContext">Http上下文</param>
         /// <param name="fileStream">文件流</param>
-        public List<FormFileInfo> SaveZipFiles(HttpContext httpContext, Stream fileStream)
+        public (Template, List<FormFileInfo>) SaveZipFiles(Stream fileStream)
         {
-            //var session = httpContext.Session;
-            var formFileInfos = new List<FormFileInfo>();
-            using (var zipInputStream = new ZipInputStream(fileStream))
+            Template template = null;
+            var memoryFileStream = new MemoryStream();
+            fileStream.CopyTo(memoryFileStream);
+            fileStream.Position = 0;
+            memoryFileStream.Position = 0;
+            using (var zipInputStream = new ZipInputStream(memoryFileStream))
             {
                 ZipEntry zipEntry;
                 while ((zipEntry = zipInputStream.GetNextEntry()) != null)
                 {
-                    if (!zipEntry.IsFile) continue;
+                    if (!(
+                        zipEntry.IsFile
+                        && zipEntry.Name.Equals("configs.xml", StringComparison.OrdinalIgnoreCase)
+                    )) continue;
                     var memoryStream = new MemoryStream();
                     var buffer = new byte[4096];
                     StreamUtils.Copy(zipInputStream, memoryStream, buffer);
                     memoryStream.Position = 0;
+                    template = DeserializeTemplateFrom(memoryStream);
+                    break;
+                }
+            }
+
+            if (template == null) throw new Exception.TemplateFileAddItemConfigFileNotExistException("找不到模板配置文件。");
+
+            var formFileInfos = new List<FormFileInfo>();
+            memoryFileStream = new MemoryStream();
+            fileStream.CopyTo(memoryFileStream);
+            fileStream.Position = 0;
+            memoryFileStream.Position = 0;
+            using (var zipInputStream = new ZipInputStream(memoryFileStream))
+            {
+                ZipEntry zipEntry;
+                while ((zipEntry = zipInputStream.GetNextEntry()) != null)
+                {
+                    if (!(
+                        zipEntry.IsFile &&
+                        zipEntry.Name.StartsWith("wwwroot/", StringComparison.OrdinalIgnoreCase)
+                    )) continue;
+                    var memoryStream = new MemoryStream();
+                    var buffer = new byte[4096];
+                    var compressedZipStream = new GZipStream(memoryStream, CompressionMode.Compress, true);
+                    StreamUtils.Copy(zipInputStream, compressedZipStream, buffer);
+                    
+                    memoryStream.Position = 0;
                     var sha1 = GetFileSHA1(memoryStream);
+
                     var uploadedFile = _dataBaseContext.UploadedFiles.FirstOrDefault(m => m.SHA1 == sha1) ??
-                                       formFileInfos.Select(o => o.UploadedFile)
-                                           .FirstOrDefault(m => m.SHA1 == sha1);
+                                       formFileInfos.Select(o => o.UploadedFile).FirstOrDefault(m => m.SHA1 == sha1);
+
                     if (uploadedFile == null)
                     {
                         memoryStream.Position = 0;
@@ -137,8 +170,7 @@ namespace Scottxu.Blog.Models.Units
                         uploadedFile = new UploadedFile
                         {
                             FileName = fileName,
-                            SHA1 = sha1,
-                            //SessionId = session.Id
+                            SHA1 = sha1
                         };
                     }
 
@@ -146,15 +178,15 @@ namespace Scottxu.Blog.Models.Units
                     {
                         UploadedFile = uploadedFile,
                         FileName = Path.GetFileName(zipEntry.Name),
-                        VirtualPath = $"/{zipEntry.Name}",
+                        VirtualPath = zipEntry.Name.Remove(0, "wwwroot".Length),
                         MIME = GetMappings(zipEntry.Name)
                     };
                     formFileInfos.Add(formFileInfo);
                 }
-
-                _dataBaseContext.UploadedFiles.AddRange(formFileInfos.Select(o => o.UploadedFile).Where(q => false));
-                return formFileInfos;
             }
+
+            _dataBaseContext.UploadedFiles.AddRange(formFileInfos.Select(o => o.UploadedFile).Where(q => false));
+            return (template, formFileInfos);
         }
 
         /// <summary>
@@ -210,7 +242,7 @@ namespace Scottxu.Blog.Models.Units
         /// 从磁盘删除文件。
         /// </summary>
         /// <param name="fileInfo">文件信息</param>
-        static void DeleteFileFromDisk(FileInfo fileInfo)
+        static void DeleteFileFromDisk(FileSystemInfo fileInfo)
         {
             if (fileInfo.Exists) fileInfo.Delete();
         }
@@ -228,7 +260,7 @@ namespace Scottxu.Blog.Models.Units
         /// </summary>
         /// <returns>十六进制字符串</returns>
         /// <param name="bytes">字节数组</param>
-        static string BytesToHexString(byte[] bytes)
+        static string BytesToHexString(IEnumerable<byte> bytes)
         {
             var stringBuilder = new StringBuilder();
             bytes.ToList().ForEach(q => stringBuilder.Append(q.ToString("x2")));
@@ -239,7 +271,7 @@ namespace Scottxu.Blog.Models.Units
         /// 获取指定文件的MIME类型
         /// </summary>
         /// <returns>MIME类型</returns>
-        /// <param name="fileName">File name.</param>
+        /// <param name="fileName">文件名</param>
         static string GetMappings(string fileName)
         {
             var extensionName = Path.GetExtension(fileName);
@@ -248,5 +280,13 @@ namespace Scottxu.Blog.Models.Units
                 value = "application/octet-stream";
             return value;
         }
+
+        /// <summary>
+        /// 将模板配置文件流序列化成对象
+        /// </summary>
+        /// <param name="stream">流</param>
+        /// <returns>页面模板</returns>
+        static Template DeserializeTemplateFrom(Stream stream) =>
+            (Template) new XmlSerializer(typeof(Template)).Deserialize(stream);
     }
 }

@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Scottxu.Blog.Models.Entitys;
+using Scottxu.Blog.Models.Entities;
 using Scottxu.Blog.Models.Helpers;
 using Scottxu.Blog.Models.Exception;
 using Scottxu.Blog.Models.Units;
@@ -40,7 +40,7 @@ namespace Scottxu.Blog.Models
             using (var transaction = dataBaseContext.Database.BeginTransaction())
             {
                 Config(dataBaseContext, configs);
-                TemplateFile(httpContext, dataBaseContext, hostingEnvironment);
+                TemplateFile(dataBaseContext, hostingEnvironment);
                 transaction.Commit();
             }
         }
@@ -52,24 +52,19 @@ namespace Scottxu.Blog.Models
                 Email = configs.Email,
                 Password = PasswordHelper.CreateDbPassword(configs.Password, false),
                 BlogName = configs.BlogName,
-                UserName = configs.UserName
+                UserName = configs.UserName,
+                TemplateGuid = "dd5f4fa2-545d-4d95-927b-94df4103483e"
             };
             configUnit.SaveAll();
         }
 
-        static void TemplateFile(HttpContext httpContext, BlogSystemContext dataBaseContext,
+        static void TemplateFile(BlogSystemContext dataBaseContext,
             IHostingEnvironment hostingEnvironment)
         {
-            var uploadUnit = new UploadUnit(dataBaseContext, hostingEnvironment);
-            var formFileInfos = uploadUnit.SaveZipFiles(httpContext,
-                File.OpenRead($"{hostingEnvironment.ContentRootPath}/default-template.zip"));
-            dataBaseContext.TemplateFiles.AddRange(formFileInfos.Select(formFile => new TemplateFile()
-            {
-                MIME = formFile.MIME,
-                Name = formFile.FileName,
-                UploadedFile = formFile.UploadedFile,
-                VirtualPath = formFile.VirtualPath
-            }));
+            Template.AddZipFile(dataBaseContext, hostingEnvironment,
+                (_dataBaseContext, _hostingEnvironment) =>
+                    new UploadUnit(dataBaseContext, _hostingEnvironment).SaveZipFiles(
+                        File.OpenRead($"{hostingEnvironment.ContentRootPath}/default-template.zip")));
             dataBaseContext.SaveChanges();
         }
     }

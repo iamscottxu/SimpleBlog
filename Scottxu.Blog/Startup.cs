@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Scottxu.Blog.Middlewares.TemplateParsingMiddleware;
 using Scottxu.Blog.Models;
-using Scottxu.Blog.TemplateParsingMiddleware;
-using Scottxu.Blog.Captcha;
+using Scottxu.Blog.Services.CaptchaService;
+using StackExchange.Redis;
 
 namespace Scottxu.Blog
 {
@@ -54,6 +54,11 @@ namespace Scottxu.Blog
             });
             */
 
+            services.AddDistributedRedisCache(options =>
+            {
+                options.Configuration = Configuration.GetConnectionString("BloggingCacheRedis");
+            });
+            
             services.AddCaptcha(Configuration);
 
             services.AddMvc();

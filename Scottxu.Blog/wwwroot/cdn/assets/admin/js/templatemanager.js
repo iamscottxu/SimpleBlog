@@ -3,8 +3,8 @@
         $('#delete_item_confirm').modal({
             relatedTarget: this,
             onConfirm: function (options) {
-                var relatedTarget = $(this.relatedTarget);
-                var form = relatedTarget.parents('form');
+                let relatedTarget = $(this.relatedTarget);
+                let form = relatedTarget.parents('form');
                 $.ajax({
                     url: form.attr('action'),
                     data: {
@@ -26,14 +26,14 @@
 
     $('.edit-item').click(function () {
         $('#edit_item_guid').val($(this).parents('tr').data('guid'));
-        $('#edit_item_virtualpath').val($(this).parents('tr').find('.table-template-virtualpath').text());
+        $('#edit_item_name').val($(this).parents('tr').find('.table-template-name').text());
     });
 
     $('#delete_select').click(function () {
         $('#delete_select_confirm').modal({
             relatedTarget: this,
             onConfirm: function (options) {
-                var table_form = $('#table_form');
+                let table_form = $('#table_form');
                 if (table_form.find('[name="deleteGuid"]:checked').length > 0)
                     table_form.submit();
             }

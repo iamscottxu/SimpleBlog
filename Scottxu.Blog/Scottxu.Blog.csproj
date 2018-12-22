@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -20,6 +20,8 @@
     <LangVersion>Latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="BuildBundlerMinifier" Version="2.8.391" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.2.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.0" />
@@ -29,9 +31,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.1.6" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.8.10" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.8.11" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.6" />
-    <PackageReference Include="StackExchange.Redis" Version="2.0.519" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,22 +40,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Middlewares" />
     <Folder Include="wwwroot\" />
     <Folder Include="Views\Admin\" />
     <Folder Include="Views\Auth\" />
-    <Folder Include="Models\Entity\" />
+    <Folder Include="Models\Entities\" />
     <Folder Include="Models\Helpers\" />
     <Folder Include="Models\Units\" />
     <Folder Include="Views\Setup\" />
-    <Folder Include="Models\ViewModel\" />
-    <Folder Include="Models\ViewModel\Home\" />
-    <Folder Include="Models\ViewModel\Admin\" />
+    <Folder Include="Models\ViewModels\" />
+    <Folder Include="Models\ViewModels\Home\" />
+    <Folder Include="Models\ViewModels\Admin\" />
     <Folder Include="wwwroot\cdn\" />
-    <Folder Include="TemplateParsingMiddleware\" />
     <Folder Include="upload\" />
     <Folder Include="Models\Exception\" />
-    <Folder Include="Captcha\" />
-    <Folder Include="Captcha\ViewComponents\" />
     <Folder Include="TagHelpers\" />
     <Folder Include="Views\Account\" />
   </ItemGroup>

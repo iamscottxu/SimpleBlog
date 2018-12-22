@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Scottxu.Blog.Models.Entitys;
+using Scottxu.Blog.Models.Entities;
 using Scottxu.Blog.Models.Units;
-using Scottxu.Blog.Models.ViewModel;
+using Scottxu.Blog.Models.ViewModels;
 
 namespace Scottxu.Blog.Models.Helpers
 {

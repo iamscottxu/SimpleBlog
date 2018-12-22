@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Scottxu.Blog.Models;
-using Scottxu.Blog.Models.ViewModel.Admin;
-using Scottxu.Blog.Models.ViewModel;
-using Scottxu.Blog.Models.Entitys;
+using Scottxu.Blog.Models.ViewModels.Admin;
+using Scottxu.Blog.Models.ViewModels;
+using Scottxu.Blog.Models.Entities;
 using Scottxu.Blog.Models.Helpers;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
@@ -282,17 +282,17 @@ namespace Scottxu.Blog.Controllers
             {
                 PageSize = 10,
                 SortDirection = "ASC",
-                SortField = "VirtualPath",
+                SortField = "Name",
                 PageIndex = page
             };
             return new TemplateManagerViewModel()
             {
-                TemplateFiles = TemplateFile.GetData(DataBaseContext, pageInfo, searchMessage),
+                Templates = Template.GetData(DataBaseContext, pageInfo, searchMessage),
                 PageInfo = pageInfo,
                 SearchMessage = searchMessage
             };
         }
-
+        
         // POST: /Admin/TemplateManager_Delete
         [ApiAction]
         [HttpPost]
@@ -301,36 +301,34 @@ namespace Scottxu.Blog.Controllers
         {
             if (deleteGuid == null || !deleteGuid.Any())
                 throw new MissingParametersException("缺少参数。");
-            TemplateFile.Delete(DataBaseContext, HostingEnvironment, deleteGuid);
+            Template.Delete(DataBaseContext, HostingEnvironment, deleteGuid);
             DataBaseContext.SaveChanges();
         }
-
+        
         // POST: /Admin/TemplateManager_AddItem
         [ApiAction]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public void TemplateManager_AddItem(string virtualPath)
+        public void TemplateManager_AddItem(string name)
         {
-            if (string.IsNullOrEmpty(virtualPath) || Request.Form.Files.Count() != 1)
+            if (string.IsNullOrEmpty(name))
                 throw new MissingParametersException("缺少参数。");
-            TemplateFile.AddItem(DataBaseContext, HostingEnvironment, virtualPath,
-                (dataBaseContext, hostingEnvironment) =>
-                    new UploadUnit(dataBaseContext, hostingEnvironment).SaveFiles(HttpContext));
+            Template.AddItem(DataBaseContext, HostingEnvironment, name);
             DataBaseContext.SaveChanges();
         }
-
+        
         // POST: /Admin/TemplateManager_EditItem
         [ApiAction]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public void TemplateManager_EditItem(Guid guid, string virtualPath)
+        public void TemplateManager_EditItem(Guid guid, string name)
         {
-            if (string.IsNullOrEmpty(virtualPath))
+            if (string.IsNullOrEmpty(name))
                 throw new MissingParametersException("缺少参数。");
-            TemplateFile.EditItem(DataBaseContext, guid, virtualPath);
+            Template.EditItem(DataBaseContext, guid, name);
             DataBaseContext.SaveChanges();
         }
-
+        
         // POST: /Admin/TemplateManager_UploadZip
         [ApiAction]
         [HttpPost]
@@ -339,18 +337,74 @@ namespace Scottxu.Blog.Controllers
         {
             if (Request.Form.Files.Count() != 1)
                 throw new MissingParametersException("缺少参数。");
-            using (var transaction = DataBaseContext.Database.BeginTransaction())
-            {
-                TemplateFile.DeleteAll(DataBaseContext, HostingEnvironment);
-                DataBaseContext.SaveChanges();
-
-                TemplateFile.AddZipFile(DataBaseContext, HostingEnvironment,
-                    (dataBaseContext, hostingEnvironment) =>
-                        new UploadUnit(dataBaseContext, hostingEnvironment).SaveZipFiles(HttpContext));
-                DataBaseContext.SaveChanges();
-                transaction.Commit();
-            }
+            Template.AddZipFile(DataBaseContext, HostingEnvironment,
+                (dataBaseContext, hostingEnvironment) =>
+                    new UploadUnit(dataBaseContext, hostingEnvironment).SaveZipFiles(HttpContext));
+            DataBaseContext.SaveChanges();
         }
+        
+        // GET: /Admin/TemplateFileManager
+        public IActionResult TemplateFileManager(string searchMessage, Guid templateGuid, int page = 0)
+        {
+            return View(TemplateFileManager_LoadData(page, searchMessage, templateGuid));
+        }
+        
+        TemplateFileManagerViewModel TemplateFileManager_LoadData(int page, string searchMessage, Guid templateGuid)
+        {
+            var pageInfo = new PageInfoViewModel
+            {
+                PageSize = 10,
+                SortDirection = "ASC",
+                SortField = "VirtualPath",
+                PageIndex = page
+            };
+            return new TemplateFileManagerViewModel()
+            {
+                TemplateFiles = TemplateFile.GetData(DataBaseContext, pageInfo, searchMessage, templateGuid),
+                Template = DataBaseContext.Templates.FirstOrDefault(q => q.Guid == templateGuid),
+                PageInfo = pageInfo,
+                SearchMessage = searchMessage
+            };
+        }
+
+        // POST: /Admin/TemplateFileManager_Delete
+        [ApiAction]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public void TemplateFileManager_Delete(Guid[] deleteGuid)
+        {
+            if (deleteGuid == null || !deleteGuid.Any())
+                throw new MissingParametersException("缺少参数。");
+            TemplateFile.Delete(DataBaseContext, HostingEnvironment, deleteGuid);
+            DataBaseContext.SaveChanges();
+        }
+
+        // POST: /Admin/TemplateFileManager_AddItem
+        [ApiAction]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public void TemplateFileManager_AddItem(string virtualPath, Guid templateGuid)
+        {
+            if (string.IsNullOrEmpty(virtualPath) || Request.Form.Files.Count() != 1)
+                throw new MissingParametersException("缺少参数。");
+            TemplateFile.AddItem(DataBaseContext, HostingEnvironment, virtualPath, templateGuid,
+                (dataBaseContext, hostingEnvironment) =>
+                    new UploadUnit(dataBaseContext, hostingEnvironment).SaveFiles(HttpContext));
+            DataBaseContext.SaveChanges();
+        }
+
+        // POST: /Admin/TemplateFileManager_EditItem
+        [ApiAction]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public void TemplateFileManager_EditItem(Guid guid, string virtualPath)
+        {
+            if (string.IsNullOrEmpty(virtualPath))
+                throw new MissingParametersException("缺少参数。");
+            TemplateFile.EditItem(DataBaseContext, guid, virtualPath);
+            DataBaseContext.SaveChanges();
+        }
+
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {

@@ -7,6 +7,7 @@ using Scottxu.Blog.Models.Exception;
 using Scottxu.Blog.Models.Helpers;
 using Scottxu.Blog.Models.Units;
 using System.Net;
+using Scottxu.Blog.Services.CaptchaService;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,9 +15,9 @@ namespace Scottxu.Blog.Controllers
 {
     public class AuthController : BaseController
     {
-        Captcha.ICaptcha Captcha { get; }
+        ICaptcha Captcha { get; }
 
-        public AuthController(BlogSystemContext context, IOptions<SiteOptions> options, Captcha.ICaptcha captcha) :
+        public AuthController(BlogSystemContext context, IOptions<SiteOptions> options, ICaptcha captcha) :
             base(context, options) => Captcha = captcha;
 
         // GET: /Account/Login

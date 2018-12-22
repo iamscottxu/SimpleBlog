@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Scottxu.Blog.Models.Entitys;
+using Scottxu.Blog.Models.Entities;
 using System.Linq;
 
 namespace Scottxu.Blog.Models
@@ -31,7 +31,7 @@ namespace Scottxu.Blog.Models
         /// 获取或设置页面模板数据集。
         /// </summary>
         /// <value>页面模板数据集</value>
-        public DbSet<TemplateFile> Templates { get; set; }
+        public DbSet<Template> Templates { get; set; }
 
         /// <summary>
         /// 获取或设置页面模板文件数据集。
@@ -63,7 +63,7 @@ namespace Scottxu.Blog.Models
         /// <value>配置数据集</value>
         public DbSet<Config> Configs { get; set; }
 
-        public BlogSystemContext(DbContextOptions<BlogSystemContext> options) : base(options)
+        public BlogSystemContext(DbContextOptions options) : base(options)
         {
         }
 

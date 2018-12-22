@@ -3,8 +3,8 @@ $(function () {
         $('#delete_item_confirm').modal({
             relatedTarget: this,
             onConfirm: function (options) {
-                var relatedTarget = $(this.relatedTarget);
-                var form = relatedTarget.parents('form');
+                let relatedTarget = $(this.relatedTarget);
+                let form = relatedTarget.parents('form');
                 $.ajax({
                     url: form.attr('action'),
                     data: {
@@ -32,7 +32,7 @@ $(function () {
         $('#edit_item_sequence').val($(this).parents('tr').find('.table-articleType-sequence').text());
         $('#edit_item_parentType > option').removeAttr('selected');
         let parentTypeGuid = $(this).parents('tr').data('parentarticletypeguid');
-        if (parentTypeGuid == "") parentTypeGuid = "0";
+        if (parentTypeGuid === "") parentTypeGuid = "0";
         $('#edit_item_parentType > option[value="' + parentTypeGuid + '"]').attr('selected', true);
         $('#edit_item_parentType').trigger('changed.selected.amui');
     });
