@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Scottxu.Blog.Models;
-using Scottxu.Blog.Models.Helpers;
 using Scottxu.Blog.Models.Units;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -25,17 +24,17 @@ namespace Scottxu.Blog.Controllers
         // GET: /File/{articleGuid}/{uploadedFileGuid}
         public IActionResult Get(Guid articleGuid, Guid uploadedFileGuid)
         {
-            var uploadedFileArticle = DataBaseContext.UploadedFileArticles
+            var diskFile = DataBaseContext.DiskFiles
                 .Include(o => o.UploadedFile)
                 .FirstOrDefault(q => q.ArticleGuid == articleGuid &&
                                      q.UploadedFileGuid == uploadedFileGuid);
-            if (uploadedFileArticle == null) return new NotFoundResult();
+            if (diskFile == null) return new NotFoundResult();
             var uploadUnit = new UploadUnit(DataBaseContext, HostingEnvironment);
-            var fileInfo = uploadUnit.GetFileInfo(uploadedFileArticle.UploadedFile);
+            var fileInfo = uploadUnit.GetFileInfo(diskFile.UploadedFile, false);
             if (!fileInfo.Exists) return new NotFoundResult();
             Response.Headers["Content-Disposition"] =
-                $"{(Request.Query["download"].Any() ? "attachment;" : string.Empty)}filename*={Encoding.Default.BodyName}''{HttpUtility.UrlEncode(uploadedFileArticle.Name)}";
-            return File(fileInfo.OpenRead(), uploadedFileArticle.MIME);
+                $"{(Request.Query["download"].Any() ? "attachment;" : string.Empty)}filename*={Encoding.Default.BodyName}''{HttpUtility.UrlEncode(diskFile.Name)}";
+            return File(fileInfo.OpenRead(), diskFile.MIME);
         }
     }
 }

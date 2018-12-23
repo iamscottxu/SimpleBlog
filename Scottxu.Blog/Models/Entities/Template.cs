@@ -5,7 +5,6 @@ using System.Xml.Serialization;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Scottxu.Blog.Models.Exception;
 using Scottxu.Blog.Models.Helpers;
 using Scottxu.Blog.Models.Units;
@@ -88,8 +87,7 @@ namespace Scottxu.Blog.Models.Entities
             });
         }
 
-        public static void AddItem(BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment,
-            string name)
+        public static void AddItem(BlogSystemContext dataBaseContext, string name)
         {
             FormatVerificationHelper.FormatVerification(name, FormatVerificationHelper.FormatType.TemplateName,
                 new ParametersFormatErrorException("模板名称格式错误。"));

@@ -1,6 +1,4 @@
-﻿using System;
-using Scottxu.Blog.Models.ViewModels;
-using Scottxu.Blog.Models.Entities;
+﻿using Scottxu.Blog.Models.Entities;
 using System.Collections.Generic;
 
 namespace Scottxu.Blog.Models.ViewModels.Admin

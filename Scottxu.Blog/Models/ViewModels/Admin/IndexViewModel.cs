@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Scottxu.Blog.Models.ViewModels.Admin
+﻿namespace Scottxu.Blog.Models.ViewModels.Admin
 {
     public class IndexViewModel
     {

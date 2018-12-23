@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
-using Scottxu.Blog.Services.CaptchaService;
 using Scottxu.Blog.Models.Helpers;
 
 namespace Scottxu.Blog.Services.CaptchaService

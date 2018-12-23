@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Scottxu.Blog.Models;
 using Scottxu.Blog.Models.Exception;
@@ -14,13 +15,16 @@ namespace Scottxu.Blog.Controllers
     {
         IHostingEnvironment HostingEnvironment { get; }
 
+        IDistributedCache Cache { get; }
+
         public SetupController(BlogSystemContext context, IOptions<SiteOptions> options,
-            IHostingEnvironment hostingEnvironment) : base(context, options) => HostingEnvironment = hostingEnvironment;
+            IHostingEnvironment hostingEnvironment, IDistributedCache cache)
+            : base(context, options) => (HostingEnvironment, Cache) = (hostingEnvironment, cache);
 
         // GET: /Setup
         public IActionResult Index()
         {
-            if (DataBaseContext.DataBaseIsExist) return RedirectToAction(string.Empty, "Admin");
+            if (DataBaseContext.DataBaseIsExist) return Redirect(Options.GetHomeUrl(string.Empty, Request.PathBase));
             return View();
         }
 
@@ -40,7 +44,7 @@ namespace Scottxu.Blog.Controllers
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(blogName) ||
                 string.IsNullOrEmpty(userName))
                 throw new MissingParametersException("缺少参数。");
-            BlogSystemDatabaseInitializer.Seed(HttpContext, DataBaseContext, HostingEnvironment,
+            BlogSystemDatabaseInitializer.Seed(DataBaseContext, Cache, HostingEnvironment,
                 new BlogSystemDatabaseInitializer.Configs()
                 {
                     Email = email,

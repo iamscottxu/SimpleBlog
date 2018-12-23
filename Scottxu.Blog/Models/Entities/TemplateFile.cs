@@ -81,18 +81,21 @@ namespace Scottxu.Blog.Models.Entities
             return q.ToList();
         }
 
-        public static void Delete(BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment,
+        public static List<Guid> Delete(BlogSystemContext dataBaseContext, IHostingEnvironment hostingEnvironment,
             IEnumerable<Guid> deleteGuid)
         {
+            var templateGuids = new List<Guid>();
             var uploadUnit = new UploadUnit(dataBaseContext, hostingEnvironment);
             deleteGuid.ToList().ForEach(d =>
             {
-                var templateFiles = dataBaseContext.TemplateFiles.FirstOrDefault(q => q.Guid == d);
-                if (templateFiles == null) return;
-                var uploadedFileGuid = templateFiles.UploadedFileGuid;
-                dataBaseContext.TemplateFiles.Remove(templateFiles);
+                var templateFile = dataBaseContext.TemplateFiles.FirstOrDefault(q => q.Guid == d);
+                if (templateFile == null) return;
+                var uploadedFileGuid = templateFile.UploadedFileGuid;
+                dataBaseContext.TemplateFiles.Remove(templateFile);
                 uploadUnit.CheckAndDeleteFile(uploadedFileGuid);
+                templateGuids.Add(templateFile.Guid);
             });
+            return templateGuids;
         }
 
         public delegate List<UploadUnit.FormFileInfo> AddItemSaveFilesDelegate(BlogSystemContext dataBaseContext,
@@ -116,14 +119,16 @@ namespace Scottxu.Blog.Models.Entities
             }));
         }
 
-        public static void EditItem(BlogSystemContext dataBaseContext, Guid guid, string virtualPath)
+        public static Guid? EditItem(BlogSystemContext dataBaseContext, Guid guid, string virtualPath)
         {
             FormatVerificationHelper.FormatVerification(virtualPath, FormatVerificationHelper.FormatType.VirtualPath,
                 new ParametersFormatErrorException("虚拟路径格式错误。"));
             if (dataBaseContext.TemplateFiles.Any(q => q.VirtualPath == virtualPath))
                 throw new TemplateFileAddItemVirtualPathIsExistException("此虚拟路径已经存在。");
             var templateFile = dataBaseContext.TemplateFiles.FirstOrDefault(q => q.Guid == guid);
-            if (templateFile != null) templateFile.VirtualPath = virtualPath;
+            if (templateFile == null) return null;
+            templateFile.VirtualPath = virtualPath;
+            return templateFile.TemplateGuid;
         }
     }
 }

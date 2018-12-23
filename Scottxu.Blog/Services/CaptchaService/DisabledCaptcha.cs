@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Scottxu.Blog.Services.CaptchaService;
 
 namespace Scottxu.Blog.Services.CaptchaService
 {

@@ -75,12 +75,12 @@ namespace Scottxu.Blog.Controllers
             await HttpContext.SignOutAsync();
         }
 
-        public override void OnActionExecuting(ActionExecutingContext context)
-        {
-            var controllerActionDescriptor = (ControllerActionDescriptor) context.ActionDescriptor;
-            if (controllerActionDescriptor.ControllerName != "Setup" && !DataBaseContext.DataBaseIsExist)
-                context.Result = RedirectToAction(String.Empty, "Setup");
-        }
+        //public override void OnActionExecuting(ActionExecutingContext context)
+        //{
+            //var controllerActionDescriptor = (ControllerActionDescriptor) context.ActionDescriptor;
+            //if (controllerActionDescriptor.ControllerName != "Setup" && !DataBaseContext.DataBaseIsExist)
+            //context.Result = RedirectToAction(string.Empty, "Setup");
+        //}
 
         public override void OnActionExecuted(ActionExecutedContext context)
         {

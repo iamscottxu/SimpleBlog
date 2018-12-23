@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
 using Scottxu.Blog.Models.Entities;
 using Scottxu.Blog.Models.Helpers;
 using Scottxu.Blog.Models.Exception;
@@ -20,7 +19,7 @@ namespace Scottxu.Blog.Models
             public string UserName { get; set; }
         }
 
-        internal static void Seed(HttpContext httpContext, BlogSystemContext dataBaseContext,
+        internal static void Seed(BlogSystemContext dataBaseContext, IDistributedCache cache,
             IHostingEnvironment hostingEnvironment, Configs configs)
         {
             FormatVerificationHelper.FormatVerification(
@@ -39,21 +38,21 @@ namespace Scottxu.Blog.Models
             dataBaseContext.Database.EnsureCreated();
             using (var transaction = dataBaseContext.Database.BeginTransaction())
             {
-                Config(dataBaseContext, configs);
+                Config(dataBaseContext, cache, configs);
                 TemplateFile(dataBaseContext, hostingEnvironment);
                 transaction.Commit();
             }
         }
 
-        static void Config(BlogSystemContext dataBaseContext, Configs configs)
+        static void Config(BlogSystemContext dataBaseContext, IDistributedCache cache, Configs configs)
         {
-            var configUnit = new ConfigUnit(dataBaseContext)
+            var configUnit = new ConfigUnit(dataBaseContext, cache)
             {
                 Email = configs.Email,
                 Password = PasswordHelper.CreateDbPassword(configs.Password, false),
                 BlogName = configs.BlogName,
                 UserName = configs.UserName,
-                TemplateGuid = "dd5f4fa2-545d-4d95-927b-94df4103483e"
+                TemplateGuid = Guid.Parse("dd5f4fa2-545d-4d95-927b-94df4103483e")
             };
             configUnit.SaveAll();
         }

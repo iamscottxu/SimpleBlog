@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Scottxu.Blog.Models;
 using Scottxu.Blog.Models.Entities;
 using Scottxu.Blog.Models.ViewModels;
-using Scottxu.Blog.Models.Helpers;
-using Microsoft.EntityFrameworkCore;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Scottxu.Blog.Models.Units;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -17,9 +14,11 @@ namespace Scottxu.Blog.Controllers
 {
     public class APIController : BaseController
     {
-        public APIController(BlogSystemContext context, IOptions<SiteOptions> options) : base(context, options)
-        {
-        }
+        
+        IDistributedCache Cache  { get; }
+
+        public APIController(BlogSystemContext context, IDistributedCache cache, IOptions<SiteOptions> options)
+            : base(context, options) => Cache = cache;
 
         public class APIModel
         {
@@ -165,7 +164,7 @@ namespace Scottxu.Blog.Controllers
 
         object GetTypeList_LoadData()
         {
-            (object childArticleTypes, int articlesCount) = ArticleType.GetTree(DataBaseContext);
+            (object childArticleTypes, var articlesCount) = ArticleType.GetTree(DataBaseContext);
             return childArticleTypes;
         }
 
@@ -173,7 +172,7 @@ namespace Scottxu.Blog.Controllers
         [ApiAction]
         public object GetBaseInfo(bool getBlogName, bool getUserName)
         {
-            var configUnit = new ConfigUnit(DataBaseContext);
+            var configUnit = new ConfigUnit(DataBaseContext, Cache);
             var blogName = getBlogName ? configUnit.BlogName : null;
             var userName = getUserName ? configUnit.UserName : null;
             return new {blogName, userName};

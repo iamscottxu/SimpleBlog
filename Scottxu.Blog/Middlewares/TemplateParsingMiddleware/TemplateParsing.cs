@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Scottxu.Blog.Models;
 using Scottxu.Blog.Models.Entities;
+using Scottxu.Blog.Models.Exception;
 using Scottxu.Blog.Models.Units;
 
 namespace Scottxu.Blog.Middlewares.TemplateParsingMiddleware
@@ -39,21 +40,29 @@ namespace Scottxu.Blog.Middlewares.TemplateParsingMiddleware
                 return;
             }
 
-            requestUrl = requestUrl.Remove(0, 5);
-            if (string.IsNullOrEmpty(requestUrl)) requestUrl = "/";
 
-            TemplateFile templateFile;
+            //如果没有设置模板直接返回404
+            Guid? templateGuid;
             try
             {
-                templateFile = GetUploadedFile(GetUploadedFiles(dataBaseContext, cache), requestUrl);
+                if ((templateGuid = new ConfigUnit(dataBaseContext, cache).TemplateGuid) == null)
+                {
+                    context.Response.StatusCode = 404;
+                    return;
+                }
             }
             catch (NotDataBaseException)
             {
-                context.Response.Redirect(string.IsNullOrEmpty(options.Value.AdminUrl)
-                    ? "~/Admin/Setup"
-                    : $"{options.Value.AdminUrl}/Setup");
+                //数据库不存在，跳转到初始化页面
+                context.Response.Redirect(options.Value.GetAdminUrl("Setup", context.Request.PathBase));
                 return;
             }
+
+            requestUrl = requestUrl.Remove(0, 5);
+            if (string.IsNullOrEmpty(requestUrl)) requestUrl = "/";
+
+            var templateFile =
+                GetUploadedFile(GetUploadedFiles(dataBaseContext, cache, templateGuid.Value), requestUrl);
 
             if (templateFile == null)
             {
@@ -62,11 +71,20 @@ namespace Scottxu.Blog.Middlewares.TemplateParsingMiddleware
             }
 
             var uploadUnit = new UploadUnit(dataBaseContext, hostingEnvironment);
-            var fileInfo = uploadUnit.GetFileInfo(templateFile.UploadedFile);
-            if (!fileInfo.Exists)
+            var enableGzip = false;
+            var acceptEncoding = context.Request.Headers["Accept-Encoding"].FirstOrDefault();
+            if (acceptEncoding != null && acceptEncoding.Split(',').Any(q => q == "gzip")) enableGzip = true;
+
+            var fileInfo = uploadUnit.GetFileInfo(templateFile.UploadedFile, enableGzip);
+            if (fileInfo == null || !fileInfo.Exists)
             {
-                context.Response.StatusCode = 404;
-                return;
+                enableGzip = !enableGzip;
+                fileInfo = uploadUnit.GetFileInfo(templateFile.UploadedFile, enableGzip);
+                if (fileInfo == null || !fileInfo.Exists)
+                {
+                    context.Response.StatusCode = 404;
+                    return;
+                }
             }
 
             //向Cookie添加站点设置信息
@@ -84,53 +102,72 @@ namespace Scottxu.Blog.Middlewares.TemplateParsingMiddleware
 
             context.Response.ContentType = templateFile.MIME;
             context.Response.ContentLength = fileInfo.Length;
-            context.Response.Headers.Add("Content-Encoding", "gzip");
+
+            if (enableGzip) context.Response.Headers.Add("Content-Encoding", "gzip");
             context.Response.Headers.Add("Content-Disposition",
                 $"{(context.Request.Query["download"].Any() ? "attachment;" : string.Empty)}filename*={Encoding.Default.BodyName}''{HttpUtility.UrlEncode(templateFile.Name)}");
 
             await context.Response.SendFileAsync(fileInfo.FullName);
         }
 
+        /// <summary>
+        /// 获取上传文件。
+        /// </summary>
+        /// <param name="templateFiles">上传文件的列表</param>
+        /// <param name="requestUrl">请求的URL</param>
+        /// <returns>上传文件</returns>
         TemplateFile GetUploadedFile(List<TemplateFile> templateFiles, string requestUrl)
         {
+            //依次查找“/”，“/index.html”,“index.htm”
             if (requestUrl != "/")
                 return templateFiles.FirstOrDefault(p => p.VirtualPath == requestUrl);
             {
-                var templateFile = (templateFiles.FirstOrDefault(p => p.VirtualPath == "/") ??
-                                    templateFiles.FirstOrDefault(p => p.VirtualPath == "/index.html")) ??
-                                   templateFiles.FirstOrDefault(p => p.VirtualPath == "/index.htm");
+                var templateFile = templateFiles.FirstOrDefault(p => p.VirtualPath == "/" ||
+                                                                     p.VirtualPath == "/index.html" ||
+                                                                     p.VirtualPath == "/index.htm");
                 return templateFile;
             }
         }
 
-        List<TemplateFile> GetUploadedFiles(BlogSystemContext dataBaseContext, IDistributedCache cache)
+        /// <summary>
+        /// 获取上传文件的列表。
+        /// </summary>
+        /// <param name="dataBaseContext">数据库上下文</param>
+        /// <param name="cache">Redis缓存对象</param>
+        /// <param name="templateGuid">模板Guid</param>
+        /// <returns>上传文件的列表</returns>
+        /// <exception cref="NotDataBaseException">数据库不存在引发的异常</exception>
+        List<TemplateFile> GetUploadedFiles(BlogSystemContext dataBaseContext, IDistributedCache cache,
+            Guid templateGuid)
         {
             var templateFilesJson = cache.GetString("TemplateFiles");
             List<TemplateFile> templateFiles;
+            //如果缓存数据存在，则直接从缓存获取数据，否则从数据库获取数据并把数据保存到缓存
             if (string.IsNullOrEmpty(templateFilesJson))
             {
-                if (!dataBaseContext.DataBaseIsExist) throw new NotDataBaseException();
-                var configUnit = new ConfigUnit(dataBaseContext);
+                //从数据库获取数据
                 templateFiles = dataBaseContext.TemplateFiles
                     .Include(o => o.UploadedFile)
-                    .Where(q => q.TemplateGuid == Guid.Parse(configUnit.TemplateGuid))
+                    .Where(q => q.TemplateGuid == templateGuid)
                     .ToList();
+                //将数据保存到缓存
                 templateFilesJson = JsonConvert.SerializeObject(templateFiles.Select(q => new
                 {
                     q.Name,
                     q.VirtualPath,
                     q.MIME,
-                    UploadedFile = new {q.UploadedFile.FileName}
+                    UploadedFile = new
+                    {
+                        q.UploadedFile.FileName,
+                        q.UploadedFile.GzipFileName,
+                        q.UploadedFile.Size
+                    }
                 }));
                 cache.SetStringAsync("TemplateFiles", templateFilesJson);
             }
-            else templateFiles = JsonConvert.DeserializeObject<List<TemplateFile>>(templateFilesJson);
+            else templateFiles = JsonConvert.DeserializeObject<List<TemplateFile>>(templateFilesJson); //从缓存获取数据
 
             return templateFiles;
-        }
-
-        class NotDataBaseException : Exception
-        {
         }
     }
 }

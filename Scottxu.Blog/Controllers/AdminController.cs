@@ -6,11 +6,10 @@ using Scottxu.Blog.Models;
 using Scottxu.Blog.Models.ViewModels.Admin;
 using Scottxu.Blog.Models.ViewModels;
 using Scottxu.Blog.Models.Entities;
-using Scottxu.Blog.Models.Helpers;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
 using System;
+using Microsoft.Extensions.Caching.Distributed;
 using Scottxu.Blog.Models.Exception;
 using Microsoft.Extensions.Options;
 using Scottxu.Blog.Models.Units;
@@ -24,9 +23,11 @@ namespace Scottxu.Blog.Controllers
     {
         IHostingEnvironment HostingEnvironment { get; }
 
+        IDistributedCache Cache { get; }
+
         public AdminController(BlogSystemContext context, IOptions<SiteOptions> options,
-            IHostingEnvironment hostingEnvironment) :
-            base(context, options) => HostingEnvironment = hostingEnvironment;
+            IHostingEnvironment hostingEnvironment, IDistributedCache cache) :
+            base(context, options) => (HostingEnvironment, Cache) = (hostingEnvironment, cache);
 
         #region 概览
 
@@ -289,10 +290,22 @@ namespace Scottxu.Blog.Controllers
             {
                 Templates = Template.GetData(DataBaseContext, pageInfo, searchMessage),
                 PageInfo = pageInfo,
-                SearchMessage = searchMessage
+                SearchMessage = searchMessage,
+                EnableTemplateGuid = new ConfigUnit(DataBaseContext, Cache).TemplateGuid
             };
         }
-        
+
+        // POST: /Admin/TemplateManager_ChangeTemplate
+        [ApiAction]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        void TemplateManager_ChangeTemplate(Guid? templateId)
+        {
+            if (templateId == null || DataBaseContext.Templates.Any(q => q.Guid == templateId))
+                new ConfigUnit(DataBaseContext, Cache).TemplateGuid = templateId;
+            else throw new ParametersFormatErrorException("参数错误");
+        }
+
         // POST: /Admin/TemplateManager_Delete
         [ApiAction]
         [HttpPost]
@@ -303,8 +316,10 @@ namespace Scottxu.Blog.Controllers
                 throw new MissingParametersException("缺少参数。");
             Template.Delete(DataBaseContext, HostingEnvironment, deleteGuid);
             DataBaseContext.SaveChanges();
+            var templateGuid = new ConfigUnit(DataBaseContext, Cache).TemplateGuid;
+            if (deleteGuid.Any(q => q == templateGuid)) Cache.RemoveAsync("TemplateFiles");
         }
-        
+
         // POST: /Admin/TemplateManager_AddItem
         [ApiAction]
         [HttpPost]
@@ -313,10 +328,10 @@ namespace Scottxu.Blog.Controllers
         {
             if (string.IsNullOrEmpty(name))
                 throw new MissingParametersException("缺少参数。");
-            Template.AddItem(DataBaseContext, HostingEnvironment, name);
+            Template.AddItem(DataBaseContext, name);
             DataBaseContext.SaveChanges();
         }
-        
+
         // POST: /Admin/TemplateManager_EditItem
         [ApiAction]
         [HttpPost]
@@ -328,7 +343,7 @@ namespace Scottxu.Blog.Controllers
             Template.EditItem(DataBaseContext, guid, name);
             DataBaseContext.SaveChanges();
         }
-        
+
         // POST: /Admin/TemplateManager_UploadZip
         [ApiAction]
         [HttpPost]
@@ -337,18 +352,28 @@ namespace Scottxu.Blog.Controllers
         {
             if (Request.Form.Files.Count() != 1)
                 throw new MissingParametersException("缺少参数。");
+            var refreshCache = false;
+            var templateGuid = new ConfigUnit(DataBaseContext, Cache).TemplateGuid;
             Template.AddZipFile(DataBaseContext, HostingEnvironment,
                 (dataBaseContext, hostingEnvironment) =>
-                    new UploadUnit(dataBaseContext, hostingEnvironment).SaveZipFiles(HttpContext));
+                {
+                    Template template;
+                    List<UploadUnit.FormFileInfo> FormFileInfos;
+                    (template, FormFileInfos) =
+                        new UploadUnit(dataBaseContext, hostingEnvironment).SaveZipFiles(HttpContext);
+                    if (template.Guid == templateGuid) refreshCache = true;
+                    return (template, FormFileInfos);
+                });
             DataBaseContext.SaveChanges();
+            if (refreshCache) Cache.RemoveAsync("TemplateFiles");
         }
-        
+
         // GET: /Admin/TemplateFileManager
         public IActionResult TemplateFileManager(string searchMessage, Guid templateGuid, int page = 0)
         {
             return View(TemplateFileManager_LoadData(page, searchMessage, templateGuid));
         }
-        
+
         TemplateFileManagerViewModel TemplateFileManager_LoadData(int page, string searchMessage, Guid templateGuid)
         {
             var pageInfo = new PageInfoViewModel
@@ -375,8 +400,10 @@ namespace Scottxu.Blog.Controllers
         {
             if (deleteGuid == null || !deleteGuid.Any())
                 throw new MissingParametersException("缺少参数。");
-            TemplateFile.Delete(DataBaseContext, HostingEnvironment, deleteGuid);
+            var templateGuids = TemplateFile.Delete(DataBaseContext, HostingEnvironment, deleteGuid);
             DataBaseContext.SaveChanges();
+            var templateGuid = new ConfigUnit(DataBaseContext, Cache).TemplateGuid;
+            if(templateGuids.Any(q => q == templateGuid)) Cache.RemoveAsync("TemplateFiles");
         }
 
         // POST: /Admin/TemplateFileManager_AddItem
@@ -391,6 +418,8 @@ namespace Scottxu.Blog.Controllers
                 (dataBaseContext, hostingEnvironment) =>
                     new UploadUnit(dataBaseContext, hostingEnvironment).SaveFiles(HttpContext));
             DataBaseContext.SaveChanges();
+            if(new ConfigUnit(DataBaseContext, Cache).TemplateGuid == templateGuid)
+                Cache.RemoveAsync("TemplateFiles");
         }
 
         // POST: /Admin/TemplateFileManager_EditItem
@@ -401,8 +430,10 @@ namespace Scottxu.Blog.Controllers
         {
             if (string.IsNullOrEmpty(virtualPath))
                 throw new MissingParametersException("缺少参数。");
-            TemplateFile.EditItem(DataBaseContext, guid, virtualPath);
+            var templateGuid = TemplateFile.EditItem(DataBaseContext, guid, virtualPath);
             DataBaseContext.SaveChanges();
+            if(new ConfigUnit(DataBaseContext, Cache).TemplateGuid == templateGuid)
+                Cache.RemoveAsync("TemplateFiles");
         }
 
 
@@ -410,8 +441,17 @@ namespace Scottxu.Blog.Controllers
         {
             base.OnActionExecuting(context);
             if (context.Result != null) return;
-            var configUnit = new ConfigUnit(DataBaseContext);
-            ViewBag.userName = configUnit.UserName;
+            try
+            {
+                var configUnit = new ConfigUnit(DataBaseContext, Cache);
+                ViewBag.userName = configUnit.UserName;
+            }
+            catch (NotDataBaseException)
+            {
+                context.Result = Redirect(Options.GetAdminUrl("Setup", Request.PathBase));
+                return;
+            }
+
             ViewBag.articlesCount = DataBaseContext.Articles.Count();
             ViewBag.articleTypesCount = DataBaseContext.ArticleTypes.Count();
             ViewBag.articleLabelsCount = DataBaseContext.ArticleLabels.Count();

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Scottxu.Blog.Models.Exception
+﻿namespace Scottxu.Blog.Models.Exception
 {
     public class ValidateCaptchaErrorException : System.Exception
     {

@@ -1,5 +1,3 @@
-using System;
-
 namespace Scottxu.Blog.Models.ViewModels.Home
 {
     public class ErrorViewModel

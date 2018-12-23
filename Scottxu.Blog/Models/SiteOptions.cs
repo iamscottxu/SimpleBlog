@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Scottxu.Blog.Models
+﻿namespace Scottxu.Blog.Models
 {
     public class SiteOptions
     {

@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Caching.Distributed;
+using Newtonsoft.Json;
 using Scottxu.Blog.Models.Entities;
+using Scottxu.Blog.Models.Exception;
 
 namespace Scottxu.Blog.Models.Units
 {
@@ -12,6 +16,8 @@ namespace Scottxu.Blog.Models.Units
         #region fields & constructor
 
         readonly BlogSystemContext dataBaseContext;
+
+        private readonly IDistributedCache cache;
 
         public List<Config> Configs { get; private set; }
 
@@ -26,11 +32,20 @@ namespace Scottxu.Blog.Models.Units
         /// <summary>
         /// 初始化 <see cref="T:Scottxu.Blog.Models.Units.ConfigHelper"/> 的实例。
         /// </summary>
-        /// <param name="dataBaseContext">Data base context.</param>
-        public ConfigUnit(BlogSystemContext dataBaseContext)
+        /// <param name="dataBaseContext">数据库上下文</param>
+        /// <param name="cache">Redis缓存</param>
+        public ConfigUnit(BlogSystemContext dataBaseContext, IDistributedCache cache)
         {
-            Configs = dataBaseContext.Configs.ToList();
+            var configsJson = cache.GetString("Configs");
+            if (string.IsNullOrEmpty(configsJson))
+            {
+                if (!dataBaseContext.DataBaseIsExist) throw new NotDataBaseException();
+                Configs = dataBaseContext.Configs.ToList();
+                cache.SetString("Configs",JsonConvert.SerializeObject(Configs));
+            }
+            else Configs = JsonConvert.DeserializeObject<List<Config>>(configsJson);
             this.dataBaseContext = dataBaseContext;
+            this.cache = cache;
         }
 
         /// <summary>
@@ -41,7 +56,6 @@ namespace Scottxu.Blog.Models.Units
         {
             get
             {
-                
                 return Configs.Where(c => c.Key == key).Select(c => c.Value).FirstOrDefault();
             }
             set
@@ -73,6 +87,7 @@ namespace Scottxu.Blog.Models.Units
             dataBaseContext.Configs.AddRange(_addKeys);
             dataBaseContext.SaveChanges();
             Configs = dataBaseContext.Configs.ToList();
+            cache.SetString("Configs",JsonConvert.SerializeObject(Configs));
         }
 
         #endregion
@@ -118,10 +133,18 @@ namespace Scottxu.Blog.Models.Units
         /// <summary>
         /// 模板GUID
         /// </summary>
-        public string TemplateGuid
+        public Guid? TemplateGuid
         {
-            get => this["TemplateGuid"];
-            set => this["TemplateGuid"] = value;
+            get
+            {
+                if (string.IsNullOrEmpty(this["TemplateGuid"])) return null;
+                return Guid.Parse(this["TemplateGuid"]);
+            }
+            set
+            {
+                this["TemplateGuid"] = value?.ToString();
+                cache.Remove("TemplateFiles");
+            }
         }
 
         #endregion

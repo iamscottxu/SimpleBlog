@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Scottxu.Blog.Models;
 using Scottxu.Blog.Models.ViewModels;
 using Scottxu.Blog.Models.Helpers;
 using Scottxu.Blog.Models.Exception;

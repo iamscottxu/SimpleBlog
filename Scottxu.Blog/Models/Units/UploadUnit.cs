@@ -71,25 +71,29 @@ namespace Scottxu.Blog.Models.Units
         public List<FormFileInfo> SaveFiles(HttpContext httpContext)
         {
             var request = httpContext.Request;
-            //var session = httpContext.Session;
-            var formFileInfos = request.Form.Files.ToList().Select(q =>
+            var formFileInfos = new List<FormFileInfo>();
+            request.Form.Files.ToList().ForEach(q =>
             {
-                var formFileInfo = new FormFileInfo()
-                {
-                    FileName = q.FileName,
-                    MIME = q.ContentType
-                };
                 var sha1 = GetFileSHA1(q.OpenReadStream());
-                var uploadedFile = _dataBaseContext.UploadedFiles.FirstOrDefault(m => m.SHA1 == sha1);
-                if (uploadedFile == null)
-                    formFileInfo.UploadedFile = new UploadedFile()
-                    {
-                        FileName = SaveFileToDisk(q.OpenReadStream()),
-                        SHA1 = sha1
-                    };
-                else formFileInfo.UploadedFile = uploadedFile;
-                return formFileInfo;
-            }).ToList();
+
+                var uploadedFile = (_dataBaseContext.UploadedFiles.FirstOrDefault(m => m.SHA1 == sha1) ??
+                                    formFileInfos.Select(o => o.UploadedFile)
+                                        .FirstOrDefault(m => m.SHA1 == sha1)) ??
+                                   new UploadedFile
+                                   {
+                                       FileName = SaveFileToDisk(q.OpenReadStream()),
+                                       GzipFileName = SaveGzipFileToDisk(q.OpenReadStream()),
+                                       Size = q.OpenReadStream().Length,
+                                       SHA1 = sha1
+                                   };
+                formFileInfos.Add(new FormFileInfo()
+                {
+                    UploadedFile = uploadedFile,
+                    FileName = Path.GetFileName(q.FileName),
+                    VirtualPath = q.FileName,
+                    MIME = GetMappings(q.FileName)
+                });
+            });
             _dataBaseContext.UploadedFiles.AddRange(formFileInfos.Select(o => o.UploadedFile).Where(q => false));
             return formFileInfos;
         }
@@ -152,39 +156,32 @@ namespace Scottxu.Blog.Models.Units
                         zipEntry.IsFile &&
                         zipEntry.Name.StartsWith("wwwroot/", StringComparison.OrdinalIgnoreCase)
                     )) continue;
-                    var memoryStream = new MemoryStream();
-                    var buffer = new byte[4096];
-                    var compressedZipStream = new GZipStream(memoryStream, CompressionMode.Compress, true);
-                    StreamUtils.Copy(zipInputStream, compressedZipStream, buffer);
-                    
-                    memoryStream.Position = 0;
-                    var sha1 = GetFileSHA1(memoryStream);
+                    var fileMemoryStream = new MemoryStream();
+                    StreamUtils.Copy(zipInputStream, fileMemoryStream, new byte[4096]);
 
-                    var uploadedFile = _dataBaseContext.UploadedFiles.FirstOrDefault(m => m.SHA1 == sha1) ??
-                                       formFileInfos.Select(o => o.UploadedFile).FirstOrDefault(m => m.SHA1 == sha1);
+                    var sha1 = GetFileSHA1(fileMemoryStream);
 
-                    if (uploadedFile == null)
-                    {
-                        memoryStream.Position = 0;
-                        var fileName = SaveFileToDisk(memoryStream);
-                        uploadedFile = new UploadedFile
-                        {
-                            FileName = fileName,
-                            SHA1 = sha1
-                        };
-                    }
-
-                    var formFileInfo = new FormFileInfo()
+                    var uploadedFile = (_dataBaseContext.UploadedFiles.FirstOrDefault(m => m.SHA1 == sha1) ??
+                                        formFileInfos.Select(o => o.UploadedFile)
+                                            .FirstOrDefault(m => m.SHA1 == sha1)) ??
+                                       new UploadedFile
+                                       {
+                                           FileName = SaveFileToDisk(fileMemoryStream),
+                                           GzipFileName = SaveGzipFileToDisk(fileMemoryStream),
+                                           Size = fileMemoryStream.Length,
+                                           SHA1 = sha1
+                                       };
+                    fileStream.Close();
+                    formFileInfos.Add(new FormFileInfo()
                     {
                         UploadedFile = uploadedFile,
                         FileName = Path.GetFileName(zipEntry.Name),
                         VirtualPath = zipEntry.Name.Remove(0, "wwwroot".Length),
                         MIME = GetMappings(zipEntry.Name)
-                    };
-                    formFileInfos.Add(formFileInfo);
+                    });
                 }
             }
-
+            memoryFileStream.Close();
             _dataBaseContext.UploadedFiles.AddRange(formFileInfos.Select(o => o.UploadedFile).Where(q => false));
             return (template, formFileInfos);
         }
@@ -197,7 +194,7 @@ namespace Scottxu.Blog.Models.Units
         {
             var uploadedFile = _dataBaseContext.UploadedFiles
                 .Include(o => o.TemplateFiles)
-                .Include(o => o.UploadedFileArticles)
+                .Include(o => o.DiskFiles)
                 .FirstOrDefault(q => q.Guid == uploadedFileGuid);
 
             var templateFiles = new List<TemplateFile>();
@@ -206,13 +203,14 @@ namespace Scottxu.Blog.Models.Units
             {
                 if (_dataBaseContext.Entry(n).State != EntityState.Deleted) templateFiles.Add(n);
             });
-            var uploadedFileArticles = new List<UploadedFileArticle>();
-            uploadedFile.UploadedFileArticles.ToList().ForEach(n =>
+            var diskFiles = new List<DiskFile>();
+            uploadedFile.DiskFiles.ToList().ForEach(n =>
             {
-                if (_dataBaseContext.Entry(n).State != EntityState.Deleted) uploadedFileArticles.Add(n);
+                if (_dataBaseContext.Entry(n).State != EntityState.Deleted) diskFiles.Add(n);
             });
-            if (uploadedFileArticles.Any() || templateFiles.Any()) return;
-            DeleteFileFromDisk(GetFileInfo(uploadedFile));
+            if (diskFiles.Any() || templateFiles.Any()) return;
+            DeleteFileFromDisk(GetFileInfo(uploadedFile, true));
+            DeleteFileFromDisk(GetFileInfo(uploadedFile, false));
             _dataBaseContext.UploadedFiles.Remove(uploadedFile);
         }
 
@@ -221,8 +219,14 @@ namespace Scottxu.Blog.Models.Units
         /// </summary>
         /// <returns>文件信息</returns>
         /// <param name="uploadedFile">上传文件实体</param>
-        public FileInfo GetFileInfo(UploadedFile uploadedFile)
-            => new FileInfo($"{_hostingEnvironment.ContentRootPath}{UploadPath}/{uploadedFile.FileName}");
+        /// <param name="enableGzip">启用Gzip</param>
+        public FileInfo GetFileInfo(UploadedFile uploadedFile, bool enableGzip)
+        {
+            if (enableGzip && string.IsNullOrEmpty(uploadedFile.GzipFileName)) return null;
+            if (!enableGzip && string.IsNullOrEmpty(uploadedFile.FileName)) return null;
+            return new FileInfo(Path.Join($"{_hostingEnvironment.ContentRootPath}{UploadPath}",
+                enableGzip ? uploadedFile.GzipFileName : uploadedFile.FileName));
+        }
 
         /// <summary>
         /// 保存文件到磁盘
@@ -231,11 +235,31 @@ namespace Scottxu.Blog.Models.Units
         /// <param name="stream">文件流</param>
         string SaveFileToDisk(Stream stream)
         {
+            stream.Position = 0;
             var fileName = Guid.NewGuid().ToString("N");
-            var fileStream = File.Create($"{_hostingEnvironment.ContentRootPath}{UploadPath}/{fileName}");
-            stream.CopyTo(fileStream);
-            fileStream.Close();
+            using (var fileStream = File.Create($"{_hostingEnvironment.ContentRootPath}{UploadPath}/{fileName}"))
+            {
+                stream.CopyTo(fileStream);
+            }
             return fileName;
+        }
+
+        /// <summary>
+        /// 保存Gzip压缩到文件到磁盘
+        /// </summary>
+        /// <returns>文件名</returns>
+        /// <param name="stream">文件流</param>
+        string SaveGzipFileToDisk(Stream stream)
+        {
+            stream.Position = 0;
+            using (var gzipFileMemoryStream = new MemoryStream())
+            {
+                using (var compressedZipStream = new GZipStream(gzipFileMemoryStream, CompressionMode.Compress, true))
+                {
+                    stream.CopyTo(compressedZipStream);
+                }
+                return SaveFileToDisk(gzipFileMemoryStream);
+            }
         }
 
         /// <summary>
@@ -244,7 +268,7 @@ namespace Scottxu.Blog.Models.Units
         /// <param name="fileInfo">文件信息</param>
         static void DeleteFileFromDisk(FileSystemInfo fileInfo)
         {
-            if (fileInfo.Exists) fileInfo.Delete();
+            if (fileInfo != null && fileInfo.Exists) fileInfo.Delete();
         }
 
         /// <summary>
@@ -253,7 +277,10 @@ namespace Scottxu.Blog.Models.Units
         /// <returns>SHA1值</returns>
         /// <param name="stream">文件流</param>
         static string GetFileSHA1(Stream stream)
-            => BytesToHexString(new SHA1CryptoServiceProvider().ComputeHash(stream));
+        {
+            stream.Position = 0;
+            return BytesToHexString(new SHA1CryptoServiceProvider().ComputeHash(stream));
+        }
 
         /// <summary>
         /// 将字节数组转换为十六进制字符串。

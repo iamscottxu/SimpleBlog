@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Scottxu.Blog.Models.ViewModels
+﻿namespace Scottxu.Blog.Models.ViewModels
 {
     public class PageInfoViewModel
     {

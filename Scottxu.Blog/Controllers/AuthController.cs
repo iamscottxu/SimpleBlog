@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Scottxu.Blog.Models;
@@ -7,6 +6,7 @@ using Scottxu.Blog.Models.Exception;
 using Scottxu.Blog.Models.Helpers;
 using Scottxu.Blog.Models.Units;
 using System.Net;
+using Microsoft.Extensions.Caching.Distributed;
 using Scottxu.Blog.Services.CaptchaService;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -16,9 +16,11 @@ namespace Scottxu.Blog.Controllers
     public class AuthController : BaseController
     {
         ICaptcha Captcha { get; }
+        
+        IDistributedCache Cache  { get; }
 
-        public AuthController(BlogSystemContext context, IOptions<SiteOptions> options, ICaptcha captcha) :
-            base(context, options) => Captcha = captcha;
+        public AuthController(BlogSystemContext context, IDistributedCache cache, IOptions<SiteOptions> options, 
+            ICaptcha captcha) : base(context, options) => (Captcha, Cache) = (captcha, cache);
 
         // GET: /Account/Login
         public IActionResult Index()
@@ -38,7 +40,7 @@ namespace Scottxu.Blog.Controllers
                 email, FormatVerificationHelper.FormatType.Email, new ParametersFormatErrorException("电子邮箱地址格式错误。"));
             FormatVerificationHelper.FormatVerification(
                 password, FormatVerificationHelper.FormatType.Password, new ParametersFormatErrorException("密码格式错误。"));
-            var configUnit = new ConfigUnit(DataBaseContext);
+            var configUnit = new ConfigUnit(DataBaseContext, Cache);
             if (configUnit.Email == email && PasswordHelper.ComparePasswords(configUnit.Password, password))
                 await UserLoginAsync(email);
             else throw new LoginEmailOrPasswordErrorException("电子邮箱地址或密码错误。");

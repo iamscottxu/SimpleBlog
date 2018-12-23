@@ -61,12 +61,6 @@ namespace Scottxu.Blog.Models.Entities
         public virtual ICollection<ArticleLabelArticle> ArticleLabelArticles { get; set; }
 
         /// <summary>
-        /// 获取或设置上传文件文章的集合
-        /// </summary>
-        /// <value>上传文件文章</value>
-        public virtual ICollection<UploadedFileArticle> UploadedFileArticles { get; set; }
-
-        /// <summary>
         /// 初始化类 <see cref="T:Scottxu.Blog.Models.Article"/> 的一个新的实例。
         /// </summary>
         public Article()
@@ -130,19 +124,13 @@ namespace Scottxu.Blog.Models.Entities
             deleteGuid.ToList().ForEach(d =>
             {
                 var article = dataBaseContext.Articles.FirstOrDefault(q => q.Guid == d);
-                var uploadedFileArticles =
-                    dataBaseContext.UploadedFileArticles.Where(q => q.Article == article).ToList();
-                uploadedFileArticles.ForEach(q =>
-                {
-                    dataBaseContext.UploadedFileArticles.Remove(q);
-                    uploadUnit.CheckAndDeleteFile(q.UploadedFileGuid);
-                });
+                if (article == null) return;
                 dataBaseContext.Articles.Remove(article);
             });
         }
 
         public static void AddItem(BlogSystemContext dataBaseContext, string name, Guid articleTypeGuid,
-            Guid[] articleLabelGuids, string content)
+            IEnumerable<Guid> articleLabelGuids, string content)
         {
             FormatVerificationHelper.FormatVerification(name, FormatVerificationHelper.FormatType.ArticleName,
                 new ParametersFormatErrorException("文章名格式错误。"));

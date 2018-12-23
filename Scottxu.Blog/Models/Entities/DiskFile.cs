@@ -1,13 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Scottxu.Blog.Models.Entities;
 
 namespace Scottxu.Blog.Models.Entities
 {
     /// <summary>
-    /// 上传文件文章实体
+    /// 网盘文件实体
     /// </summary>
-    public class UploadedFileArticle
+    public class DiskFile
     {
         /// <summary>
         /// 获取或设置上传文件。
@@ -17,11 +16,6 @@ namespace Scottxu.Blog.Models.Entities
 
         public Guid UploadedFileGuid { get; set; }
 
-        /// <summary>
-        /// 获取或设置文章。
-        /// </summary>
-        /// <value>文章</value>
-        public virtual Article Article { get; set; }
 
         public Guid ArticleGuid { get; set; }
 
@@ -29,7 +23,7 @@ namespace Scottxu.Blog.Models.Entities
         /// 获取或设置文件的名称。
         /// </summary>
         /// <value>文件的名称</value>
-        [StringLength(260)]
+        [Required, StringLength(260)]
         public string Name { get; set; }
 
         /// <summary>
@@ -38,5 +32,13 @@ namespace Scottxu.Blog.Models.Entities
         /// <value>MIME类型</value>
         [MaxLength]
         public string MIME { get; set; }
+
+        /// <summary>
+        /// 获取或设置文件夹。
+        /// </summary>
+        /// <value>文件夹</value>
+        public virtual DiskFileFolder DiskFileFolder { get; set; }
+
+        public Guid DiskFileFolderGuid { get; set; }
     }
 }

@@ -55,7 +55,7 @@ namespace Scottxu.Blog.Models
         /// 获取或设置上传文件文章数据集。
         /// </summary>
         /// <value>上传文件文章数据集</value>
-        public DbSet<UploadedFileArticle> UploadedFileArticles { get; set; }
+        public DbSet<DiskFile> DiskFiles { get; set; }
 
         /// <summary>
         /// 获取或设置配置数据集。
@@ -92,6 +92,12 @@ namespace Scottxu.Blog.Models
                 .HasForeignKey(f => f.ArticleTypeGuid)
                 .IsRequired(true)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<ArticleType>()
+                .HasOne(l => l.ParentArticleType)
+                .WithMany(r => r.ChildArticleTypes)
+                .HasForeignKey(f => f.ParentArticleTypeGuid)
+                .OnDelete(DeleteBehavior.Cascade);
 
             //
             modelBuilder.Entity<ArticleLabelArticle>()
@@ -113,20 +119,36 @@ namespace Scottxu.Blog.Models
                 .HasKey(k => new {k.ArticleGuid, k.ArticleLabelGuid});
 
             //
-            modelBuilder.Entity<UploadedFileArticle>()
+            modelBuilder.Entity<DiskFile>()
+                .HasIndex(i => i.Name)
+                .IsUnique(true);
+            
+            modelBuilder.Entity<DiskFile>()
                 .HasKey(k => new {k.UploadedFileGuid, k.ArticleGuid});
 
-            modelBuilder.Entity<UploadedFileArticle>()
-                .HasOne(r => r.Article)
-                .WithMany(l => l.UploadedFileArticles)
-                .HasForeignKey(f => f.ArticleGuid)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<UploadedFileArticle>()
+            modelBuilder.Entity<DiskFile>()
                 .HasOne(r => r.UploadedFile)
-                .WithMany(l => l.UploadedFileArticles)
+                .WithMany(l => l.DiskFiles)
                 .HasForeignKey(f => f.UploadedFileGuid)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict); //不允许级联删除
+            
+            //
+            modelBuilder.Entity<DiskFileFolder>()
+                .HasIndex(i => i.Name)
+                .IsUnique(true);
+            
+            modelBuilder.Entity<DiskFileFolder>()
+                .HasOne(l => l.ParentDiskFileFolder)
+                .WithMany(r => r.ChildDiskFileFolders)
+                .HasForeignKey(f => f.ParentDiskFileFolderGuid)
+                .OnDelete(DeleteBehavior.Restrict);  //不允许级联删除
+            
+            modelBuilder.Entity<DiskFileFolder>()
+                .HasMany(r => r.DiskFiles)
+                .WithOne(l => l.DiskFileFolder)
+                .HasForeignKey(f => f.DiskFileFolderGuid)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Restrict);   //不允许级联删除
 
             //
             modelBuilder.Entity<UploadedFile>()
@@ -142,7 +164,7 @@ namespace Scottxu.Blog.Models
                 .WithOne(l => l.UploadedFile)
                 .IsRequired(true)
                 .HasForeignKey(f => f.UploadedFileGuid)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict); //不允许级联删除
 
             //
             modelBuilder.Entity<Template>()
@@ -150,20 +172,13 @@ namespace Scottxu.Blog.Models
                 .WithOne(l => l.Template)
                 .IsRequired(true)
                 .HasForeignKey(f => f.TemplateGuid)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict); //不允许级联删除
 
 
             //
             modelBuilder.Entity<TemplateFile>()
                 .HasIndex(i => i.VirtualPath)
                 .IsUnique(true);
-
-
-            modelBuilder.Entity<ArticleType>()
-                .HasOne(l => l.ParentArticleType)
-                .WithMany(r => r.ChildArticleTypes)
-                .HasForeignKey(f => f.ParentArticleTypeGuid)
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Scottxu.Blog.Services.CaptchaService;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace Scottxu.Blog.Services.CaptchaService.ViewComponents
 {
