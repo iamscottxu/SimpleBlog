@@ -55,7 +55,7 @@
                         //启用按钮
                         btn_Login.button('reset');
                     } else {
-                        window.location.replace(window.location.pathname + '/../Admin');
+                        window.location.replace(window.location.pathname + '/');
                     }
                 },
                 error: function () {
