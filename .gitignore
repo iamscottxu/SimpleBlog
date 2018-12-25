@@ -14,6 +14,10 @@ TestResults/
 *.psd
 *.ai
 
+# bower
+/Scottxu.Blog/wwwroot/cdn/lib/*
+!/Scottxu.Blog/wwwroot/cdn/lib/ueditor/
+
 # vscode
 .vscode/
 

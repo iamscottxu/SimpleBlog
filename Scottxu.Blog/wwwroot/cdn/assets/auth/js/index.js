@@ -35,7 +35,7 @@
                 url: window.location.pathname + '/PostBack',
                 data: {
                     'email': data.email,
-                    'password': hex_md5(hex_md5(data.password)),
+                    'password': md5.hex(md5.hex(data.password)),
                     'captchaText': captchaText
                 },
                 success: function (data) {
